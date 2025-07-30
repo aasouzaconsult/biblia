@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evangelhos Sinóticos - Comparação Interativa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            padding: 2rem 0;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .chapter-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chapter-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chapter-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .chapter-btn:hover::before {
+            left: 100%;
+        }
+
+        .chapter-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .chapter-btn.active {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1e3c72;
+            border-color: white;
+            transform: scale(1.05);
+        }
+
+        .content-area {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .chapter-content {
+            display: none;
+        }
+
+        .chapter-content.active {
+            display: block;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chapter-title {
+            font-size: 2.2rem;
+            color: #1e3c72;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .chapter-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298);
+            border-radius: 2px;
+        }
+
+        .narrative-grid {
+            display: grid;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .narrative-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #1e3c72;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .narrative-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(30, 60, 114, 0.05), rgba(42, 82, 152, 0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .narrative-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .narrative-card:hover::before {
+            opacity: 1;
+        }
+
+        .narrative-title {
+            font-size: 1.5rem;
+            color: #1e3c72;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .gospel-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .gospel-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .gospel-section.marcos {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #fff5f5, #ffe6e6);
+        }
+
+        .gospel-section.mateus {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #f5fff5, #e6ffe6);
+        }
+
+        .gospel-section.lucas {
+            border-color: #ffc107;
+            background: linear-gradient(135deg, #fffef5, #fffce6);
+        }
+
+        .gospel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .gospel-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+
+        .gospel-icon.marcos { background: #dc3545; }
+        .gospel-icon.mateus { background: #28a745; }
+        .gospel-icon.lucas { background: #ffc107; }
+
+        .gospel-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .verse-ref {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-left: auto;
+        }
+
+        .gospel-text {
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, rgba(255, 193, 7, 0.3) 0%, rgba(255, 193, 7, 0.3) 100%);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .observations {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 2rem;
+            border-left: 5px solid #2196f3;
+        }
+
+        .observations h4 {
+            color: #1565c0;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .observations ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .observations li {
+            margin-bottom: 0.8rem;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .observations li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #2196f3;
+            font-weight: bold;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e3c72;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1e3c72;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .chapter-selector {
+                padding: 1rem;
+            }
+            
+            .content-area {
+                padding: 2rem 1.5rem;
+            }
+            
+            .gospel-comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>EVANGELHOS SINÓTICOS</h1>
+        <p>Comparação interativa entre Marcos, Mateus e Lucas</p>
+    </div>
+
+    <div class="container">
+        <div class="chapter-selector">
+            <button class="chapter-btn active" onclick="showChapter(1)">Capítulo 1</button>
+            <button class="chapter-btn" onclick="showChapter(2)">Capítulo 2</button>
+            <button class="chapter-btn" onclick="showChapter(3)">Capítulo 3</button>
+            <button class="chapter-btn" onclick="showChapter(4)">Capítulo 4</button>
+            <button class="chapter-btn" onclick="showChapter(5)">Capítulo 5</button>
+            <button class="chapter-btn" onclick="showChapter(6)">Capítulo 6</button>
+            <button class="chapter-btn" onclick="showChapter(7)">Capítulo 7</button>
+            <button class="chapter-btn" onclick="showChapter(8)">Capítulo 8</button>
+            <button class="chapter-btn" onclick="showChapter(9)">Capítulo 9</button>
+            <button class="chapter-btn" onclick="showChapter(10)">Capítulo 10</button>
+            <button class="chapter-btn" onclick="showChapter(11)">Capítulo 11</button>
+            <button class="chapter-btn" onclick="showChapter(12)">Capítulo 12</button>
+            <button class="chapter-btn" onclick="showChapter(13)">Capítulo 13</button>
+            <button class="chapter-btn" onclick="showChapter(14)">Capítulo 14</button>
+            <button class="chapter-btn" onclick="showChapter(15)">Capítulo 15</button>
+            <button class="chapter-btn" onclick="showChapter(16)">Capítulo 16</button>
+        </div>
+
+        <div class="content-area">
+            <!-- Capítulo 1 -->
+            <div class="chapter-content active" id="chapter-1">
+                <h2 class="chapter-title">Capítulo 1 - Os Primórdios do Evangelho</h2>
+                
+                <div class="narrative-grid">
+                    <div class="narrative-card">
+                        <h3 class="narrative-title">João Batista Prepara o Caminho</h3>
+                        <div class="gospel-comparison">
+                            <div class="gospel-section marcos">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon marcos"></div>
+                                    <div class="gospel-name">Marcos</div>
+                                    <div class="verse-ref">1:1-8</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Começa com <span class="highlight">"Princípio do evangelho de Jesus Cristo, o Filho de Deus"</span>. Cita Isaías sobre a voz no deserto. Descreve as roupas de João (pêlos de camelo, cinto de couro) e sua alimentação (gafanhotos e mel).
+                                </div>
+                            </div>
+                            <div class="gospel-section mateus">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon mateus"></div>
+                                    <div class="gospel-name">Mateus</div>
+                                    <div class="verse-ref">3:1-12</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Começa com "Naqueles dias surgiu João Batista". Inclui <span class="highlight">advertências aos fariseus e saduceus: "Raça de víboras!"</span> Descreve roupas e alimentação similares a Marcos.
+                                </div>
+                            </div>
+                            <div class="gospel-section lucas">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon lucas"></div>
+                                    <div class="gospel-name">Lucas</div>
+                                    <div class="verse-ref">3:1-18</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Começa com <span class="highlight">contexto histórico detalhado</span> (reinado de Tibério César, Pôncio Pilatos). Inclui instruções específicas para publicanos e soldados. Não menciona roupas ou alimentação.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="narrative-card">
+                        <h3 class="narrative-title">O Batismo de Jesus</h3>
+                        <div class="gospel-comparison">
+                            <div class="gospel-section marcos">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon marcos"></div>
+                                    <div class="gospel-name">Marcos</div>
+                                    <div class="verse-ref">1:9-11</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Relato direto: Jesus vem de Nazaré e é batizado. Os céus se abrem, Espírito desce como pomba. Voz dos céus: <span class="highlight">"Tu és o meu Filho amado"</span>.
+                                </div>
+                            </div>
+                            <div class="gospel-section mateus">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon mateus"></div>
+                                    <div class="gospel-name">Mateus</div>
+                                    <div class="verse-ref">3:13-17</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Único que menciona <span class="highlight">a hesitação de João Batista</span>: "Eu preciso ser batizado por ti". Voz dos céus: "Este é o meu Filho amado".
+                                </div>
+                            </div>
+                            <div class="gospel-section lucas">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon lucas"></div>
+                                    <div class="gospel-name">Lucas</div>
+                                    <div class="verse-ref">3:21-22</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Menciona que <span class="highlight">Jesus estava orando</span> após o batismo. Espírito Santo desce "em forma corpórea". Voz: "Tu és o meu Filho amado".
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="narrative-card">
+                        <h3 class="narrative-title">A Tentação de Jesus</h3>
+                        <div class="gospel-comparison">
+                            <div class="gospel-section marcos">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon marcos"></div>
+                                    <div class="gospel-name">Marcos</div>
+                                    <div class="verse-ref">1:12-13</div>
+                                </div>
+                                <div class="gospel-text">
+                                    <span class="highlight">Relato breve</span>: 40 dias no deserto, tentado por Satanás. Estava com animais selvagens, anjos o serviam. Sem detalhes das tentações específicas.
+                                </div>
+                            </div>
+                            <div class="gospel-section mateus">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon mateus"></div>
+                                    <div class="gospel-name">Mateus</div>
+                                    <div class="verse-ref">4:1-11</div>
+                                </div>
+                                <div class="gospel-text">
+                                    <span class="highlight">Três tentações detalhadas</span>: 1) Pedras em pão, 2) Atirar-se do templo, 3) Adorar o diabo pelos reinos. Anjos o servem no final.
+                                </div>
+                            </div>
+                            <div class="gospel-section lucas">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon lucas"></div>
+                                    <div class="gospel-name">Lucas</div>
+                                    <div class="verse-ref">4:1-13</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Três tentações com <span class="highlight">ordem diferente</span>: 1) Pedra em pão, 2) Reinos do mundo, 3) Templo. "Diabo o deixou até ocasião oportuna".
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="narrative-card">
+                        <h3 class="narrative-title">Chamado dos Primeiros Discípulos</h3>
+                        <div class="gospel-comparison">
+                            <div class="gospel-section marcos">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon marcos"></div>
+                                    <div class="gospel-name">Marcos</div>
+                                    <div class="verse-ref">1:16-20</div>
+                                </div>
+                                <div class="gospel-text">
+                                    <span class="highlight">Chamado simples e direto</span>: "Sigam-me, e eu os farei pescadores de homens". Simão, André, Tiago e João deixam tudo imediatamente.
+                                </div>
+                            </div>
+                            <div class="gospel-section mateus">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon mateus"></div>
+                                    <div class="gospel-name">Mateus</div>
+                                    <div class="verse-ref">4:18-22</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Relato muito similar a Marcos. Identifica Simão como <span class="highlight">"chamado Pedro"</span>. Menciona Zebedeu, pai de Tiago e João.
+                                </div>
+                            </div>
+                            <div class="gospel-section lucas">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon lucas"></div>
+                                    <div class="gospel-name">Lucas</div>
+                                    <div class="verse-ref">5:1-11</div>
+                                </div>
+                                <div class="gospel-text">
+                                    <span class="highlight">Narrativa expandida</span>: Multidão, barco de Simão, pesca milagrosa. Pedro: "Afasta-te de mim, Senhor, porque sou um homem pecador!"
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="observations">
+                    <h4>Observações Importantes</h4>
+                    <ul>
+                        <li>Marcos é considerado o evangelho mais antigo (65-70 d.C.)</li>
+                        <li>Mateus destaca o cumprimento das profecias do Antigo Testamento</li>
+                        <li>Lucas fornece mais contexto histórico e detalhes narrativos</li>
+                        <li>Todos mencionam o Espírito descendo como pomba no batismo</li>
+                        <li>As diferenças refletem os diferentes públicos-alvo de cada evangelista</li>
+                    </ul>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Narrativas Principais</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Evangelhos Sinóticos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">Discípulos Chamados</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">40</div>
+                        <div class="stat-label">Dias de Tentação</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capítulo 2 -->
+            <div class="chapter-content" id="chapter-2">
+                <h2 class="chapter-title">Capítulo 2 - Autoridade e Misericórdia</h2>
+                
+                <div class="narrative-grid">
+                    <div class="narrative-card">
+                        <h3 class="narrative-title">Cura do Paralítico</h3>
+                        <div class="gospel-comparison">
+                            <div class="gospel-section marcos">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon marcos"></div>
+                                    <div class="gospel-name">Marcos</div>
+                                    <div class="verse-ref">2:1-12</div>
+                                </div>
+                                <div class="gospel-text">
+                                    <span class="highlight">Detalhes do telhado</span>: "removeram parte da cobertura e baixaram a maca". Jesus perdoa pecados primeiro, depois cura: "Para que vocês saibam que o Filho do homem tem autoridade..."
+                                </div>
+                            </div>
+                            <div class="gospel-section mateus">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon mateus"></div>
+                                    <div class="gospel-name">Mateus</div>
+                                    <div class="verse-ref">9:1-8</div>
+                                </div>
+                                <div class="gospel-text">
+                                    <span class="highlight">Omite o detalhe do telhado</span>. Foca na autoridade de Jesus para perdoar pecados. "Tenha bom ânimo, filho; os seus pecados estão perdoados".
+                                </div>
+                            </div>
+                            <div class="gospel-section lucas">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon lucas"></div>
+                                    <div class="gospel-name">Lucas</div>
+                                    <div class="verse-ref">5:17-26</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Menciona o terraço: <span class="highlight">"subiram ao terraço e o baixaram através de uma abertura"</span>. Inclui fariseus e mestres da lei presentes.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="narrative-card">
+                        <h3 class="narrative-title">Chamado de Levi/Mateus</h3>
+                        <div class="gospel-comparison">
+                            <div class="gospel-section marcos">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon marcos"></div>
+                                    <div class="gospel-name">Marcos</div>
+                                    <div class="verse-ref">2:13-14</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Chama-o de <span class="highlight">"Levi, filho de Alfeu"</span>. Menciona Jesus ensinando à beira-mar antes do chamado.
+                                </div>
+                            </div>
+                            <div class="gospel-section mateus">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon mateus"></div>
+                                    <div class="gospel-name">Mateus</div>
+                                    <div class="verse-ref">9:9</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Chama-o de <span class="highlight">"Mateus"</span> (o próprio evangelista se identifica). Relato mais conciso.
+                                </div>
+                            </div>
+                            <div class="gospel-section lucas">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon lucas"></div>
+                                    <div class="gospel-name">Lucas</div>
+                                    <div class="verse-ref">5:27-28</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Chama-o de "Levi". Enfatiza que <span class="highlight">"deixou tudo"</span> para seguir Jesus.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="narrative-card">
+                        <h3 class="narrative-title">Refeição com Publicanos e Pecadores</h3>
+                        <div class="gospel-comparison">
+                            <div class="gospel-section marcos">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon marcos"></div>
+                                    <div class="gospel-name">Marcos</div>
+                                    <div class="verse-ref">2:15-17</div>
+                                </div>
+                                <div class="gospel-text">
+                                    "Durante uma refeição na casa de Levi". Jesus: <span class="highlight">"Não são os que têm saúde que precisam de médico, mas sim os doentes"</span>.
+                                </div>
+                            </div>
+                            <div class="gospel-section mateus">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon mateus"></div>
+                                    <div class="gospel-name">Mateus</div>
+                                    <div class="verse-ref">9:10-13</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Acrescenta citação do AT: <span class="highlight">"Desejo misericórdia, não sacrifícios"</span>. Mesma parábola do médico.
+                                </div>
+                            </div>
+                            <div class="gospel-section lucas">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon lucas"></div>
+                                    <div class="gospel-name">Lucas</div>
+                                    <div class="verse-ref">5:29-32</div>
+                                </div>
+                                <div class="gospel-text">
+                                    <span class="highlight">"Levi ofereceu um grande banquete"</span>. Acrescenta "ao arrependimento": "Eu não vim chamar justos, mas pecadores ao arrependimento".
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="narrative-card">
+                        <h3 class="narrative-title">Pergunta sobre o Jejum</h3>
+                        <div class="gospel-comparison">
+                            <div class="gospel-section marcos">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon marcos"></div>
+                                    <div class="gospel-name">Marcos</div>
+                                    <div class="verse-ref">2:18-22</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Parábola do noivo: <span class="highlight">"Como podem os convidados do noivo jejuar enquanto este está com eles?"</span> Parábolas do remendo e do vinho novo.
+                                </div>
+                            </div>
+                            <div class="gospel-section mateus">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon mateus"></div>
+                                    <div class="gospel-name">Mateus</div>
+                                    <div class="verse-ref">9:14-17</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Usa <span class="highlight">"ficar de luto"</span> em vez de "jejuar". Mesmas parábolas do remendo e vinho novo.
+                                </div>
+                            </div>
+                            <div class="gospel-section lucas">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon lucas"></div>
+                                    <div class="gospel-name">Lucas</div>
+                                    <div class="verse-ref">5:33-39</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Menciona que discípulos de João <span class="highlight">"jejuam e oram frequentemente"</span>. Adiciona: "O vinho velho é melhor!" (v.39).
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="narrative-card">
+                        <h3 class="narrative-title">Jesus e o Sábado</h3>
+                        <div class="gospel-comparison">
+                            <div class="gospel-section marcos">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon marcos"></div>
+                                    <div class="gospel-name">Marcos</div>
+                                    <div class="verse-ref">2:23-28</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Únicos versículos exclusivos: <span class="highlight">"O sábado foi feito por causa do homem, e não o homem por causa do sábado"</span>. Exemplo de Davi e os pães da Presença.
+                                </div>
+                            </div>
+                            <div class="gospel-section mateus">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon mateus"></div>
+                                    <div class="gospel-name">Mateus</div>
+                                    <div class="verse-ref">12:1-8</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Menciona que discípulos <span class="highlight">"estavam com fome"</span>. Mesmo exemplo de Davi, mas sem o ditado sobre o sábado.
+                                </div>
+                            </div>
+                            <div class="gospel-section lucas">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon lucas"></div>
+                                    <div class="gospel-name">Lucas</div>
+                                    <div class="verse-ref">6:1-5</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Detalhe específico: <span class="highlight">"esfregando-as nas mãos para comer os grãos"</span>. Exemplo de Davi sem o ditado de Marcos.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="observations">
+                    <h4>Temas Centrais do Capítulo 2</h4>
+                    <ul>
+                        <li>Autoridade de Jesus para perdoar pecados</li>
+                        <li>Misericórdia para com os marginalizados (publicanos, pecadores)</li>
+                        <li>Nova interpretação da Lei (jejum e sábado)</li>
+                        <li>Conflito crescente com os líderes religiosos</li>
+                        <li>Jesus como médico espiritual que veio curar os "doentes"</li>
+                    </ul>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">4</div>
+                        <div class="stat-label">Narrativas Principais</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">1</div>
+                        <div class="stat-label">Paralítico Curado</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">1</div>
+                        <div class="stat-label">Discípulo Chamado</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Parábolas Ensinadas</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capítulo 3 -->
+            <div class="chapter-content" id="chapter-3">
+                <h2 class="chapter-title">Capítulo 3 - Autoridade e Oposição</h2>
+                
+                <div class="narrative-grid">
+                    <div class="narrative-card">
+                        <h3 class="narrative-title">Cura do Homem com a Mão Atrofiada</h3>
+                        <div class="gospel-comparison">
+                            <div class="gospel-section marcos">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon marcos"></div>
+                                    <div class="gospel-name">Marcos</div>
+                                    <div class="verse-ref">3:1-6</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Único que menciona <span class="highlight">a ira e tristeza de Jesus</span> pelos corações endurecidos. Fariseus conspiram com os herodianos.
+                                </div>
+                            </div>
+                            <div class="gospel-section mateus">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon mateus"></div>
+                                    <div class="gospel-name">Mateus</div>
+                                    <div class="verse-ref">12:9-14</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Inclui <span class="highlight">parábola da ovelha</span>: "Qual de vocês... não irá pegá-la? Quanto mais vale um homem do que uma ovelha!"
+                                </div>
+                            </div>
+                            <div class="gospel-section lucas">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon lucas"></div>
+                                    <div class="gospel-name">Lucas</div>
+                                    <div class="verse-ref">6:6-11</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Especifica que era <span class="highlight">a mão direita</span>. "Jesus sabia o que pensavam". Ficaram furiosos e discutiram o que fazer.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="narrative-card">
+                        <h3 class="narrative-title">Jesus e as Multidões</h3>
+                        <div class="gospel-comparison">
+                            <div class="gospel-section marcos">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon marcos"></div>
+                                    <div class="gospel-name">Marcos</div>
+                                    <div class="verse-ref">3:7-12</div>
+                                </div>
+                                <div class="gospel-text">
+                                    <span class="highlight">Detalhes geográficos completos</span>: Galiléia, Judéia, Jerusalém, Iduméia, além do Jordão, Tiro e Sidom. Menciona o barco para evitar ser comprimido.
+                                </div>
+                            </div>
+                            <div class="gospel-section mateus">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon mateus"></div>
+                                    <div class="gospel-name">Mateus</div>
+                                    <div class="verse-ref">12:15-21</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Inclui <span class="highlight">longa citação de Isaías</span>: "Eis o meu servo, a quem escolhi... Porei sobre ele o meu Espírito".
+                                </div>
+                            </div>
+                            <div class="gospel-section lucas">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon lucas"></div>
+                                    <div class="gospel-name">Lucas</div>
+                                    <div class="verse-ref">6:17-19</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Enfatiza <span class="highlight">"poder que saía de Jesus"</span> e curava a todos. "Lugar plano" em vez de monte.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="narrative-card">
+                        <h3 class="narrative-title">Escolha dos Doze Apóstolos</h3>
+                        <div class="gospel-comparison">
+                            <div class="gospel-section marcos">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon marcos"></div>
+                                    <div class="gospel-name">Marcos</div>
+                                    <div class="verse-ref">3:13-19</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Único que menciona <span class="highlight">"Boanerges" (filhos do trovão)</span> para Tiago e João. "Designando-os como apóstolos".
+                                </div>
+                            </div>
+                            <div class="gospel-section mateus">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon mateus"></div>
+                                    <div class="gospel-name">Mateus</div>
+                                    <div class="verse-ref">10:1-4</div>
+                                </div>
+                                <div class="gospel-text">
+                                    <span class="highlight">Mateus se identifica como "o publicano"</span>. Foca na autoridade dada para expulsar espíritos e curar.
+                                </div>
+                            </div>
+                            <div class="gospel-section lucas">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon lucas"></div>
+                                    <div class="gospel-name">Lucas</div>
+                                    <div class="verse-ref">6:12-16</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Único que menciona <span class="highlight">Jesus passou a noite orando</span> antes da escolha. Chama Tadeu de "Judas, filho de Tiago".
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="narrative-card">
+                        <h3 class="narrative-title">Acusação de Belzebu</h3>
+                        <div class="gospel-comparison">
+                            <div class="gospel-section marcos">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon marcos"></div>
+                                    <div class="gospel-name">Marcos</div>
+                                    <div class="verse-ref">3:20-30</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Único que menciona <span class="highlight">familiares pensando que Jesus estava "fora de si"</span>. Parábola da casa do homem forte. Pecado imperdoável contra o Espírito Santo.
+                                </div>
+                            </div>
+                            <div class="gospel-section mateus">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon mateus"></div>
+                                    <div class="gospel-name">Mateus</div>
+                                    <div class="verse-ref">12:22-32</div>
+                                </div>
+                                <div class="gospel-text">
+                                    Inicia com <span class="highlight">cura do cego e mudo endemoninhado</span>. Mais detalhado sobre o pecado imperdoável: "nem nesta era nem na que há de vir".
+                                </div>
+                            </div>
+                            <div class="gospel-section lucas">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon lucas"></div>
+                                    <div class="gospel-name">Lucas</div>
+                                    <div class="verse-ref">11:14-23; 12:10</div>
+                                </div>
+                                <div class="gospel-text">
+                                    <span class="highlight">Narrativa distribuída</span> em capítulos diferentes. Demônio mudo. Ensino sobre blasfêmia em contexto separado.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="narrative-card">
+                        <h3 class="narrative-title">A Verdadeira Família de Jesus</h3>
+                        <div class="gospel-comparison">
+                            <div class="gospel-section marcos">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon marcos"></div>
+                                    <div class="gospel-name">Marcos</div>
+                                    <div class="verse-ref">3:31-35</div>
+                                </div>
+                                <div class="gospel-text">
+                                    <span class="highlight">"Olhou para os que estavam assentados ao seu redor"</span>. "Quem faz a vontade de Deus, este é meu irmão, minha irmã e minha mãe".
+                                </div>
+                            </div>
+                            <div class="gospel-section mateus">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon mateus"></div>
+                                    <div class="gospel-name">Mateus</div>
+                                    <div class="verse-ref">12:46-50</div>
+                                </div>
+                                <div class="gospel-text">
+                                    <span class="highlight">"Estendendo a mão para os discípulos"</span>. "A vontade de meu Pai que está nos céus".
+                                </div>
+                            </div>
+                            <div class="gospel-section lucas">
+                                <div class="gospel-header">
+                                    <div class="gospel-icon lucas"></div>
+                                    <div class="gospel-name">Lucas</div>
+                                    <div class="verse-ref">8:19-21</div>
+                                </div>
+                                <div class="gospel-text">
+                                    <span class="highlight">Versão mais concisa</span>: "Minha mãe e meus irmãos são aqueles que ouvem a palavra de Deus e a praticam".
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="observations">
+                    <h4>Temas Centrais do Capítulo 3</h4>
+                    <ul>
+                        <li>Autoridade de Jesus sobre doenças e demônios</li>
+                        <li>Conflito intensificado com líderes religiosos</li>
+                        <li>Formação da nova comunidade (os doze apóstolos)</li>
+                        <li>Redefinição do conceito de família espiritual</li>
+                        <li>Oposição tanto religiosa quanto familiar</li>
+                    </ul>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Narrativas Principais</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">Apóstolos Escolhidos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">1</div>
+                        <div class="stat-label">Pecado Imperdoável</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">7</div>
+                        <div class="stat-label">Regiões Mencionadas</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capítulos 4-16 (Template para expansão) -->
+            <div class="chapter-content" id="chapter-4">
+                <h2 class="chapter-title">Capítulo 4 - Parábolas do Reino</h2>
+                <div class="loading">
+                    <p>Conteúdo em desenvolvimento...</p>
+                    <p>Este capítulo será expandido com as parábolas do semeador, da candeia, da semente que cresce, do grão de mostarda e a tempestade acalmada.</p>
+                </div>
+            </div>
+
+            <div class="chapter-content" id="chapter-5">
+                <h2 class="chapter-title">Capítulo 5 - Poder sobre a Natureza e Demônios</h2>
+                <div class="loading">
+                    <p>Conteúdo em desenvolvimento...</p>
+                    <p>Este capítulo incluirá o endemoninhado gadareno, a cura da mulher com hemorragia e a ressurreição da filha de Jairo.</p>
+                </div>
+            </div>
+
+            <div class="chapter-content" id="chapter-6">
+                <h2 class="chapter-title">Capítulo 6 - Rejeição e Missão</h2>
+                <div class="loading">
+                    <p>Conteúdo em desenvolvimento...</p>
+                    <p>Este capítulo abordará a rejeição em Nazaré, o envio dos doze, a morte de João Batista e a multiplicação dos pães.</p>
+                </div>
+            </div>
+
+            <div class="chapter-content" id="chapter-7">
+                <h2 class="chapter-title">Capítulo 7 - Tradições e Pureza</h2>
+                <div class="loading">
+                    <p>Conteúdo em desenvolvimento...</p>
+                    <p>Este capítulo tratará das tradições dos anciãos, o que torna impuro, a mulher siro-fenícia e cura do surdo-mudo.</p>
+                </div>
+            </div>
+
+            <div class="chapter-content" id="chapter-8">
+                <h2 class="chapter-title">Capítulo 8 - Sinais e Revelação</h2>
+                <div class="loading">
+                    <p>Conteúdo em desenvolvimento...</p>
+                    <p>Este capítulo incluirá a segunda multiplicação, sinais pedidos pelos fariseus, fermento dos fariseus, cura do cego e confissão de Pedro.</p>
+                </div>
+            </div>
+
+            <div class="chapter-content" id="chapter-9">
+                <h2 class="chapter-title">Capítulo 9 - Transfiguração e Ensinos</h2>
+                <div class="loading">
+                    <p>Conteúdo em desenvolvimento...</p>
+                    <p>Este capítulo abordará a transfiguração, o menino endemoninhado, predições da paixão e ensinos sobre grandeza.</p>
+                </div>
+            </div>
+
+            <div class="chapter-content" id="chapter-10">
+                <h2 class="chapter-title">Capítulo 10 - Casamento, Riqueza e Serviço</h2>
+                <div class="loading">
+                    <p>Conteúdo em desenvolvimento...</p>
+                    <p>Este capítulo tratará do divórcio, Jesus e as crianças, o jovem rico, o perigo das riquezas e a cura de Bartimeu.</p>
+                </div>
+            </div>
+
+            <div class="chapter-content" id="chapter-11">
+                <h2 class="chapter-title">Capítulo 11 - Entrada Triunfal e Autoridade</h2>
+                <div class="loading">
+                    <p>Conteúdo em desenvolvimento...</p>
+                    <p>Este capítulo incluirá a entrada triunfal, purificação do templo, figueira seca e questionamento da autoridade de Jesus.</p>
+                </div>
+            </div>
+
+            <div class="chapter-content" id="chapter-12">
+                <h2 class="chapter-title">Capítulo 12 - Parábolas e Controvérsias</h2>
+                <div class="loading">
+                    <p>Conteúdo em desenvolvimento...</p>
+                    <p>Este capítulo abordará a parábola dos vinhateiros, tributo a César, ressurreição, maior mandamento e a oferta da viúva.</p>
+                </div>
+            </div>
+
+            <div class="chapter-content" id="chapter-13">
+                <h2 class="chapter-title">Capítulo 13 - Discurso Escatológico</h2>
+                <div class="loading">
+                    <p>Conteúdo em desenvolvimento...</p>
+                    <p>Este capítulo tratará da destruição do templo, sinais dos tempos, grande tribulação e a vinda do Filho do homem.</p>
+                </div>
+            </div>
+
+            <div class="chapter-content" id="chapter-14">
+                <h2 class="chapter-title">Capítulo 14 - Paixão de Cristo</h2>
+                <div class="loading">
+                    <p>Conteúdo em desenvolvimento...</p>
+                    <p>Este capítulo incluirá a unção em Betânia, última ceia, Getsêmani, prisão e julgamentos de Jesus.</p>
+                </div>
+            </div>
+
+            <div class="chapter-content" id="chapter-15">
+                <h2 class="chapter-title">Capítulo 15 - Crucificação</h2>
+                <div class="loading">
+                    <p>Conteúdo em desenvolvimento...</p>
+                    <p>Este capítulo abordará o julgamento perante Pilatos, crucificação, morte de Jesus e sepultamento.</p>
+                </div>
+            </div>
+
+            <div class="chapter-content" id="chapter-16">
+                <h2 class="chapter-title">Capítulo 16 - Ressurreição</h2>
+                <div class="loading">
+                    <p>Conteúdo em desenvolvimento...</p>
+                    <p>Este capítulo tratará da ressurreição, as mulheres no túmulo, aparições e grande comissão.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2025 - Estudo Comparativo dos Evangelhos Sinóticos | Desenvolvido para análise acadêmica e estudo bíblico</p>
+    </div>
+
+    <script>
+        function showChapter(chapterNum) {
+            // Remove active class from all buttons and content
+            document.querySelectorAll('.chapter-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.chapter-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked button and corresponding content
+            event.target.classList.add('active');
+            document.getElementById(`chapter-${chapterNum}`).classList.add('active');
+            
+            // Scroll to content area
+            document.querySelector('.content-area').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+
+        // Add smooth scrolling and hover effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate cards on scroll
+            const cards = document.querySelectorAll('.narrative-card');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            cards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+
+            // Add ripple effect to buttons
+            document.querySelectorAll('.chapter-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.classList.add('ripple');
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            });
+
+            // Add highlight animation to gospel sections
+            document.querySelectorAll('.gospel-section').forEach(section => {
+                section.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.02)';
+                    this.style.transition = 'transform 0.3s ease';
+                });
+                
+                section.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+        });
+    </script>
+
+    <style>
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            pointer-events: none;
+            animation: ripple-animation 0.6s ease-out;
+        }
+
+        @keyframes ripple-animation {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .chapter-content {
+            min-height: 60vh;
+        }
+
+        .loading p {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .loading p:first-child {
+            font-weight: 600;
+            color: #1e3c72;
+            font-size: 1.3rem;
+        }
+    </style>
+</body>
+</html>
