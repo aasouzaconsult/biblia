@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="icon" href="Cia Daniel, Logo9.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minha Estante Bíblica</title>
     <style>
@@ -322,6 +323,25 @@
                 min-height: 50px;
             }
         }
+
+        /* Remove fundo, padding e borda dos ícones */
+        .social-link,
+        .social-link i {
+          background-color: transparent !important;
+          padding: 0 !important;
+          border-radius: 0 !important;
+          box-shadow: none !important;
+        }
+
+        /* Cores dos ícones */
+        .instagram i {
+          color: #C13584; /* Instagram original */
+        }
+
+        .youtube i {
+          color: #FF0000; /* YouTube original */
+        }
+
     </style>
 </head>
 <body>
@@ -490,13 +510,28 @@
                     <!--<a href="#comentarios" class="footer-link">💬 Comentários</a> -->
                 </div>
             </div>
+
+            <div class="footer-section">
+                <h3>Nossos Agentes</h3>
+                <div class="footer-links">
+                    <a href="https://chatgpt.com/g/g-6776fcfea0c0819199ca6427acf99051-estudando-a-biblia" class="footer-link" target="_blank">💬 Estudando a Bíblia</a>
+                    <a href="https://chatgpt.com/g/g-688b752c470081919845463879eb9289-palavra-raiz-hebraica" class="footer-link" target="_blank">💬 Palavra & Raiz Hebraica</a>
+                </div>
+            </div>
             
             <div class="footer-section">
                 <h3>Redes Sociais</h3>
                 <div class="social-links">
+                    <a href="https://www.instagram.com/ministeriociadedaniel/" class="social-link instagram" target="_blank">
+                      <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://www.youtube.com/@ministeriociadedaniel" class="social-link youtube" target="_blank">
+                      <i class="fab fa-youtube"></i>
+                    </a>
+
+                    <!--
                     <a href="https://www.instagram.com/ministeriociadedaniel/" class="social-link instagram" title="Instagram" target="_blank">📷</a>
                     <a href="https://www.youtube.com/@ministeriociadedaniel" class="social-link youtube" title="YouTube" target="_blank">📺</a>
-                    <!--
                     <a href="#" class="social-link facebook" title="Facebook">📘</a>
                     <a href="#" class="social-link twitter" title="Twitter">🐦</a>
                     <a href="#" class="social-link whatsapp" title="WhatsApp">📱</a>
