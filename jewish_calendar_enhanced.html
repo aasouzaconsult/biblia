@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Calendário Judaico Dinâmico</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      background: linear-gradient(45deg, #FFD700, #FFA500);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    .calendar-section {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 40px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .control-group label {
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #4a5568;
+    }
+
+    select {
+      padding: 12px 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 16px;
+      background: white;
+      transition: all 0.3s ease;
+      min-width: 150px;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .btn-primary {
+      padding: 14px 30px;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      margin-top: 24px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    th {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      padding: 15px;
+      font-weight: bold;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    td {
+      border: 1px solid #e2e8f0;
+      padding: 12px 8px;
+      text-align: center;
+      vertical-align: top;
+      min-height: 80px;
+      background: white;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    td:hover {
+      background: #f7fafc;
+      transform: scale(1.02);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    td strong {
+      font-size: 18px;
+      color: #2d3748;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    td .hebrew-date {
+      font-size: 12px;
+      color: #718096;
+      font-style: italic;
+    }
+
+    .today {
+      background: linear-gradient(135deg, #ffd700, #ffed4e) !important;
+      color: #744210;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+      animation: pulse 2s infinite;
+    }
+
+    .tisha {
+      background: linear-gradient(135deg, #fed7d7, #feb2b2) !important;
+      color: #742a2a;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    #loading {
+      text-align: center;
+      font-style: italic;
+      color: #667eea;
+      margin: 20px 0;
+      font-size: 18px;
+    }
+
+    .festivals-section {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .festivals-title {
+      text-align: center;
+      font-size: 2.5rem;
+      color: #4a5568;
+      margin-bottom: 40px;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .festivals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+    }
+
+    .festival-card {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .festival-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .festival-image {
+      width: 100%;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .festival-image.rosh-hashana {
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+    }
+
+    .festival-image.yom-kippur {
+      background: linear-gradient(135deg, #6B73FF, #9A82DB);
+    }
+
+    .festival-image.sukkot {
+      background: linear-gradient(135deg, #32CD32, #228B22);
+    }
+
+    .festival-image.hanukkah {
+      background: linear-gradient(135deg, #4169E1, #1E90FF);
+    }
+
+    .festival-image.purim {
+      background: linear-gradient(135deg, #FF69B4, #FF1493);
+    }
+
+    .festival-image.pessach {
+      background: linear-gradient(135deg, #DAA520, #B8860B);
+    }
+
+    .festival-image.shavuot {
+      background: linear-gradient(135deg, #00CED1, #00BFFF);
+    }
+
+    .festival-image.tisha-bav {
+      background: linear-gradient(135deg, #DC143C, #B22222);
+    }
+
+    .festival-content {
+      padding: 25px;
+    }
+
+    .festival-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #2d3748;
+      margin-bottom: 10px;
+    }
+
+    .festival-date {
+      color: #667eea;
+      font-weight: bold;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+    }
+
+    .festival-description {
+      color: #4a5568;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .biblical-reference {
+      background: linear-gradient(135deg, #edf2f7, #e2e8f0);
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+      font-style: italic;
+      color: #2d3748;
+      font-size: 0.9rem;
+    }
+
+    .biblical-verse {
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+      
+      .header h1 {
+        font-size: 2rem;
+      }
+      
+      .controls {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .festivals-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      td {
+        padding: 8px 4px;
+        min-height: 60px;
+      }
+      
+      td strong {
+        font-size: 16px;
+      }
+      
+      td .hebrew-date {
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>✡️ Calendário Judaico Dinâmico</h1>
+      <p>Explore as datas sagradas e festivais do povo de Israel</p>
+    </div>
+
+    <div class="calendar-section">
+      <div class="controls">
+        <div class="control-group">
+          <label for="monthSelect">Mês:</label>
+          <select id="monthSelect"></select>
+        </div>
+        <div class="control-group">
+          <label for="yearSelect">Ano:</label>
+          <select id="yearSelect"></select>
+        </div>
+        <button class="btn-primary" onclick="buildCalendar()">📅 Mostrar Calendário</button>
+      </div>
+      <div id="loading" style="display:none;">⏳ Carregando calendário...</div>
+      <div id="calendar"></div>
+    </div>
+
+    <div class="festivals-section">
+      <h2 class="festivals-title">🕯️ Principais Festivais Judaicos</h2>
+      <div class="festivals-grid">
+        
+        <div class="festival-card">
+          <div class="festival-image rosh-hashana">
+            🍯🍎
+          </div>
+          <div class="festival-content">
+            <h3 class="festival-title">Rosh Hashaná</h3>
+            <div class="festival-date">1-2 de Tishrei (Set/Out)</div>
+            <p class="festival-description">
+              O Ano Novo Judaico, também conhecido como o "Dia do Julgamento". É um tempo de reflexão, arrependimento e renovação espiritual. Celebrado com o toque do shofar (chifre de carneiro) e refeições especiais com mel e maçã.
+            </p>
+            <div class="biblical-reference">
+              <div class="biblical-verse">Levítico 23:24-25</div>
+              "No sétimo mês, no primeiro dia do mês, tereis descanso solene, memorial com sonido de trombetas, santa convocação."
+            </div>
+          </div>
+        </div>
+
+        <div class="festival-card">
+          <div class="festival-image yom-kippur">
+            ⚖️🙏
+          </div>
+          <div class="festival-content">
+            <h3 class="festival-title">Yom Kippur</h3>
+            <div class="festival-date">10 de Tishrei (Set/Out)</div>
+            <p class="festival-description">
+              O Dia da Expiação, o dia mais santo do calendário judaico. Um dia de jejum completo, oração intensa e busca por perdão. Tradicionalmente observado com 25 horas de jejum e oração contínua.
+            </p>
+            <div class="biblical-reference">
+              <div class="biblical-verse">Levítico 16:30-31</div>
+              "Porque naquele dia se fará expiação por vós, para purificar-vos; e sereis purificados de todos os vossos pecados perante o Senhor. É sábado de descanso solene para vós."
+            </div>
+          </div>
+        </div>
+
+        <div class="festival-card">
+          <div class="festival-image sukkot">
+            🏕️🌿
+          </div>
+          <div class="festival-content">
+            <h3 class="festival-title">Sukkot</h3>
+            <div class="festival-date">15-21 de Tishrei (Set/Out)</div>
+            <p class="festival-description">
+              A Festa dos Tabernáculos, comemorando a proteção divina durante os 40 anos no deserto. Famílias constroem sukás (cabanas temporárias) e celebram com as "quatro espécies": etrog, lulav, hadassim e aravot.
+            </p>
+            <div class="biblical-reference">
+              <div class="biblical-verse">Levítico 23:42-43</div>
+              "Em cabanas habitareis sete dias... para que saibam as vossas gerações que eu fiz habitar os filhos de Israel em cabanas, quando os tirei da terra do Egito."
+            </div>
+          </div>
+        </div>
+
+        <div class="festival-card">
+          <div class="festival-image hanukkah">
+            🕎✨
+          </div>
+          <div class="festival-content">
+            <h3 class="festival-title">Hanukká</h3>
+            <div class="festival-date">25 de Kislev - 2 de Tevet (Nov/Dez)</div>
+            <p class="festival-description">
+              A Festa das Luzes, celebrando o milagre do óleo que durou oito dias no Templo. Durante oito noites, acende-se uma vela adicional na hanukkiá, acompanhada de orações e comidas fritas em óleo.
+            </p>
+            <div class="biblical-reference">
+              <div class="biblical-verse">1 Macabeus 4:52-59</div>
+              "Ofereceram sacrifícios segundo a lei sobre o novo altar... celebraram a dedicação do altar durante oito dias, oferecendo holocaustos com alegria."
+            </div>
+          </div>
+        </div>
+
+        <div class="festival-card">
+          <div class="festival-image purim">
+            👑🎭
+          </div>
+          <div class="festival-content">
+            <h3 class="festival-title">Purim</h3>
+            <div class="festival-date">14 de Adar (Fev/Mar)</div>
+            <p class="festival-description">
+              Celebra a salvação do povo judeu na Pérsia através de Ester. É uma festa alegre com leitura da Meguilá (Livro de Ester), fantasias, troca de presentes e doações aos necessitados.
+            </p>
+            <div class="biblical-reference">
+              <div class="biblical-verse">Ester 9:21-22</div>
+              "Ordenando-lhes que guardassem o dia catorze do mês de adar... como dias de banquete e de alegria, e de mandarem presentes uns aos outros, e dádivas aos pobres."
+            </div>
+          </div>
+        </div>
+
+        <div class="festival-card">
+          <div class="festival-image pessach">
+            🍞🌾
+          </div>
+          <div class="festival-content">
+            <h3 class="festival-title">Pêssach (Páscoa)</h3>
+            <div class="festival-date">15-22 de Nissan (Mar/Abr)</div>
+            <p class="festival-description">
+              Comemora a libertação do Egito. Durante oito dias, come-se matzá (pão sem fermento) e evita-se qualquer chametz (fermentado). O Seder de Pêssach reconta a história do Êxodo.
+            </p>
+            <div class="biblical-reference">
+              <div class="biblical-verse">Êxodo 12:14</div>
+              "E este dia vos será por memorial, e celebrá-lo-eis por festa ao Senhor; nas vossas gerações o celebrareis por estatuto perpétuo."
+            </div>
+          </div>
+        </div>
+
+        <div class="festival-card">
+          <div class="festival-image shavuot">
+            📜⚡
+          </div>
+          <div class="festival-content">
+            <h3 class="festival-title">Shavuot</h3>
+            <div class="festival-date">6-7 de Sivan (Mai/Jun)</div>
+            <p class="festival-description">
+              A Festa de Pentecostes, celebrando a entrega da Torá no Monte Sinai e a colheita dos primeiros frutos. Tradicionalmente, estuda-se a Torá durante toda a noite e consomem-se laticínios.
+            </p>
+            <div class="biblical-reference">
+              <div class="biblical-verse">Êxodo 34:22</div>
+              "Também guardarás a festa das semanas, que é a festa das primícias da sega do trigo, e a festa da colheita no fim do ano."
+            </div>
+          </div>
+        </div>
+
+        <div class="festival-card">
+          <div class="festival-image tisha-bav">
+            😢💔
+          </div>
+          <div class="festival-content">
+            <h3 class="festival-title">Tish'a B'Av</h3>
+            <div class="festival-date">9 de Av (Jul/Ago)</div>
+            <p class="festival-description">
+              Dia de jejum e lamentação pela destruição do Primeiro e Segundo Templos de Jerusalém. É um período de profunda reflexão sobre as tragédias na história judaica e a esperança de redenção.
+            </p>
+            <div class="biblical-reference">
+              <div class="biblical-verse">Lamentações 1:1-2</div>
+              "Como está solitária a cidade que era populosa! A que era grande entre as nações tornou-se como viúva... chora amargamente de noite."
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Lista de nomes dos meses em português.
+    const monthNames = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
+    // Popula os campos de seleção de mês e ano ao carregar a página.
+    function populateSelectors() {
+      const monthSelect = document.getElementById('monthSelect');
+      const yearSelect = document.getElementById('yearSelect');
+      const currentDate = new Date();
+      
+      // Preencher meses
+      monthNames.forEach((name, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = name;
+        if (index === currentDate.getMonth()) {
+          option.selected = true;
+        }
+        monthSelect.appendChild(option);
+      });
+      
+      // Preencher anos (por exemplo, de 2020 a 2030)
+      for (let year = 2020; year <= 2030; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if (year === currentDate.getFullYear()) {
+          option.selected = true;
+        }
+        yearSelect.appendChild(option);
+      }
+    }
+
+    // Constrói o calendário com base no mês e ano selecionados.
+    function buildCalendar() {
+      const month = parseInt(document.getElementById('monthSelect').value);
+      const year = parseInt(document.getElementById('yearSelect').value);
+      const firstDay = new Date(year, month, 1);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      
+      // Mostra loading
+      document.getElementById('loading').style.display = 'block';
+      
+      // Limpa calendários anteriores
+      const calendarDiv = document.getElementById('calendar');
+      calendarDiv.innerHTML = '';
+      
+      // Simula um pequeno delay para mostrar o loading
+      setTimeout(() => {
+        // Cria a tabela do calendário
+        const table = document.createElement('table');
+        const headerRow = document.createElement('tr');
+        const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        
+        dayNames.forEach(day => {
+          const th = document.createElement('th');
+          th.textContent = day;
+          headerRow.appendChild(th);
+        });
+        table.appendChild(headerRow);
+
+        let dateCounter = 1;
+        const startWeekday = firstDay.getDay();
+        
+        // Monta as linhas do calendário
+        for (let row = 0; row < 6; row++) {
+          const tr = document.createElement('tr');
+          for (let col = 0; col < 7; col++) {
+            const td = document.createElement('td');
+            const globalIndex = row * 7 + col;
+            
+            if (globalIndex >= startWeekday && dateCounter <= daysInMonth) {
+              // Data atual no calendário gregoriano
+              const currentDate = new Date(year, month, dateCounter);
+              
+              // Formata a data hebraica
+              const hebrewFormatter = new Intl.DateTimeFormat('en-u-ca-hebrew', { 
+                day: 'numeric', 
+                month: 'long' 
+              });
+              const hebDateStr = hebrewFormatter.format(currentDate);
+              const [hebDayStr, hebMonth] = hebDateStr.split(' ');
+              const hebDay = parseInt(hebDayStr, 10);
+
+              td.innerHTML = `
+                <strong>${dateCounter}</strong>
+                <div class="hebrew-date">${hebDateStr}</div>
+              `;
+
+              // Destacar o dia atual
+              const today = new Date();
+              if (dateCounter === today.getDate() && 
+                  month === today.getMonth() && 
+                  year === today.getFullYear()) {
+                td.classList.add('today');
+              }
+
+              // Destacar Tish'a B'Av (9 Av)
+              if (hebMonth === 'Av' && hebDay === 9) {
+                td.classList.add('tisha');
+                td.title = "Tish'a B'Av";
+              }
+
+              dateCounter++;
+            }
+            tr.appendChild(td);
+          }
+          table.appendChild(tr);
+        }
+        
+        calendarDiv.appendChild(table);
+        document.getElementById('loading').style.display = 'none';
+      }, 500);
+    }
+
+    // Inicializa seletores quando a página carrega
+    window.addEventListener('load', function() {
+      populateSelectors();
+      buildCalendar(); // Mostra o calendário do mês atual automaticamente
+    });
+  </script>
+</body>
+</html>
