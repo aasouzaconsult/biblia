@@ -1,582 +1,190 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <link rel="icon" href="Cia Daniel, Logo9.png" type="image/png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Estante Bíblica</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <link rel="icon" href="Cia Daniel, Logo9.png" type="image/png">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hub de Estudos Bíblicos</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f4f8;
+      color: #333;
+    }
 
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f5f5f5;
-            padding: 20px;
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+    header {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 1.5rem;
+      text-align: center;
+      position: relative;
+    }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: white;
-            border: 4px solid #333;
-            border-radius: 10px;
-            overflow: hidden;
-            flex: 1;
-            margin-bottom: 20px;
-        }
+    .logo-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
 
-        .header {
-            background-color: #fff;
-            text-align: center;
-            padding: 20px;
-            border-bottom: 3px solid #333;
-        }
+    .logo {
+      height: 50px;
+      width: auto;
+    }
 
-        .header h1 {
-            font-size: 2.5em;
-            font-weight: bold;
-            letter-spacing: 2px;
-            color: #333;
-        }
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
 
-        .shelf {
-            display: flex;
-            flex-wrap: wrap;
-            border-bottom: 3px solid #333;
-            position: relative;
-            min-height: 120px;
-            background-color: #f9f9f9;
-        }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
 
-        .shelf:last-child {
-            border-bottom: none;
-        }
+    .card {
+      background: #ffffff;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
 
-        .shelf-section {
-            flex: 1;
-            padding: 15px;
-            border-right: 2px solid #333;
-            min-width: 200px;
-        }
+    .card:hover {
+      transform: translateY(-4px);
+    }
 
-        .shelf-section:last-child {
-            border-right: none;
-        }
+    .card h3 {
+      margin: 0 0 0.3rem;
+      font-size: 1.1rem;
+    }
 
-        .section-title {
-            font-weight: bold;
-            font-size: 1.2em;
-            margin-bottom: 10px;
-            color: #333;
-            text-align: center;
-        }
+    .card p {
+      font-size: 0.9rem;
+      margin: 0;
+    }
 
-        .books-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            justify-content: center;
-            align-items: flex-end;
-            min-height: 80px;
-        }
+    .section-title {
+      font-size: 1.2rem;
+      margin: 1.5rem 1rem 0.5rem;
+      color: #2c3e50;
+    }
 
-        .book {
-            background: linear-gradient(135deg, #4a4a4a, #2a2a2a);
-            color: white;
-            padding: 8px 4px;
-            border-radius: 3px;
-            font-size: 0.8em;
-            font-weight: bold;
-            text-decoration: none;
-            border: 1px solid #000;
-            box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-            writing-mode: vertical-lr;
-            text-orientation: mixed;
-            height: 80px;
-            width: 25px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            line-height: 1.1;
-        }
+    footer {
+      background: #2c3e50;
+      color: #ecf0f1;
+      text-align: center;
+      padding: 1.5rem 1rem;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+    }
 
-        .book:hover {
-            transform: translateY(-5px);
-            box-shadow: 2px 7px 8px rgba(0,0,0,0.4);
-            background: linear-gradient(135deg, #5a5a5a, #3a3a3a);
-        }
+    .social-icons a {
+      margin: 0 8px;
+      color: #ecf0f1;
+      text-decoration: none;
+    }
 
-        .book.pentateuco { background: linear-gradient(135deg, #8B4513, #654321); }
-        .book.historicos { background: linear-gradient(135deg, #4169E1, #1E3A8A); }
-        .book.poeticos { background: linear-gradient(135deg, #8B008B, #4B0082); }
-        .book.profetas-maiores { background: linear-gradient(135deg, #FF6347, #CD5C5C); }
-        .book.profetas-menores { background: linear-gradient(135deg, #32CD32, #228B22); }
-        .book.evangelhos { background: linear-gradient(135deg, #FFD700, #FFA500); }
-        .book.historico-nt { background: linear-gradient(135deg, #20B2AA, #008B8B); }
-        .book.cartas-paulinas { background: linear-gradient(135deg, #DC143C, #B22222); }
-        .book.outras-cartas { background: linear-gradient(135deg, #9932CC, #8B008B); }
-        .book.profetico { background: linear-gradient(135deg, #FF4500, #FF6347); }
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 1.5rem;
+      }
 
-        .decoration {
-            position: absolute;
-            font-size: 2em;
-            color: #ddd;
-        }
+      .logo {
+        height: 40px;
+      }
 
-        .teddy {
-            right: 20px;
-            top: 20px;
-        }
+      .card h3 {
+        font-size: 1rem;
+      }
 
-        .plant {
-            left: 20px;
-            top: 20px;
-        }
-
-        .clock {
-            right: 20px;
-            bottom: 20px;
-        }
-
-        .glasses {
-            left: 20px;
-            bottom: 20px;
-        }
-
-        .pineapple {
-            right: 50px;
-            bottom: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .shelf {
-                flex-direction: column;
-            }
-            
-            .shelf-section {
-                border-right: none;
-                border-bottom: 2px solid #333;
-            }
-            
-            .shelf-section:last-child {
-                border-bottom: none;
-            }
-            
-            .header h1 {
-                font-size: 2em;
-            }
-            
-            .book {
-                height: 60px;
-                width: 20px;
-                font-size: 0.7em;
-            }
-            
-            .books-container {
-                min-height: 60px;
-            }
-        }
-
-        /* Estilos do Rodapé */
-        .footer {
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            color: white;
-            padding: 40px 0 20px;
-            width: 100%;
-            margin-top: auto;
-        }
-
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 40px;
-            padding: 0 20px;
-        }
-
-        .footer-section h3 {
-            color: #ecf0f1;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 8px;
-        }
-
-        .footer-section p {
-            line-height: 1.6;
-            color: #bdc3c7;
-            margin-bottom: 15px;
-        }
-
-        .footer-links {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .footer-link {
-            color: #ecf0f1;
-            text-decoration: none;
-            padding: 8px 0;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .footer-link:hover {
-            color: #3498db;
-            transform: translateX(5px);
-        }
-
-        .social-links {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .social-link {
-            display: inline-block;
-            width: 45px;
-            height: 45px;
-            background: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2em;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        .social-link:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-        }
-
-        .social-link.facebook { background: #1877f2; }
-        .social-link.instagram { background: #e4405f; }
-        .social-link.youtube { background: #ff0000; }
-        .social-link.twitter { background: #1da1f2; }
-        .social-link.whatsapp { background: #25d366; }
-
-        .footer-bottom {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #34495e;
-            color: #95a5a6;
-        }
-
-        .footer-bottom p {
-            margin: 5px 0;
-        }
-
-        /* Responsividade do Rodapé */
-        @media (max-width: 768px) {
-            .footer-content {
-                grid-template-columns: 1fr;
-                gap: 30px;
-                text-align: center;
-            }
-            
-            .footer-links {
-                align-items: center;
-            }
-            
-            .social-links {
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                margin: 10px;
-            }
-            
-            .header h1 {
-                font-size: 1.5em;
-            }
-            
-            .book {
-                height: 50px;
-                width: 18px;
-                font-size: 0.6em;
-            }
-            
-            .books-container {
-                min-height: 50px;
-            }
-        }
-
-        /* Remove fundo, padding e borda dos ícones */
-        .social-link,
-        .social-link i {
-          background-color: transparent !important;
-          padding: 0 !important;
-          border-radius: 0 !important;
-          box-shadow: none !important;
-        }
-
-        /* Cores dos ícones */
-        .instagram i {
-          color: #C13584; /* Instagram original */
-        }
-
-        .youtube i {
-          color: #FF0000; /* YouTube original */
-        }
-
-    </style>
+      .card p {
+        font-size: 0.85rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>ESTANTE BÍBLICA</h1>
-        </div>
 
-        <!-- Primeira Prateleira -->
-        <div class="shelf">
-            <div class="shelf-section">
-                <div class="section-title">Pentateuco</div>
-                <div class="books-container">
-                    <a href="#genesis" class="book pentateuco">Gênesis</a>
-                    <a href="#exodo" class="book pentateuco">Êxodo</a>
-                    <a href="#levitico" class="book pentateuco">Levítico</a>
-                    <a href="#numeros" class="book pentateuco">Números</a>
-                    <a href="#deuteronomio" class="book pentateuco">Deuteronômio</a>
-                </div>
-            </div>
-            <div class="shelf-section">
-                <div class="section-title">Históricos</div>
-                <div class="books-container">
-                    <a href="#josue" class="book historicos">Josué</a>
-                    <a href="#juizes" class="book historicos">Juízes</a>
-                    <a href="#rute" class="book historicos">Rute</a>
-                    <a href="#1_samuel" class="book historicos">I Samuel</a>
-                    <a href="#2_samuel" class="book historicos">II Samuel</a>
-                    <a href="#1_reis" class="book historicos">I Reis</a>
-                    <a href="#2_reis" class="book historicos">II Reis</a>
-                    <a href="#1_cronicas" class="book historicos">I Crônicas</a>
-                    <a href="#2_cronicas" class="book historicos">II Crônicas</a>
-                    <a href="#esdras" class="book historicos">Esdras</a>
-                    <a href="#neemias" class="book historicos">Neemias</a>
-                    <a href="#ester" class="book historicos">Ester</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Segunda Prateleira -->
-        <div class="shelf">
-            <div class="shelf-section">
-                <div class="section-title">Poéticos</div>
-                <div class="books-container">
-                    <a href="#jo" class="book poeticos">Jó</a>
-                    <a href="#salmos" class="book poeticos">Salmos</a>
-                    <a href="#proverbios" class="book poeticos">Provérbios</a>
-                    <a href="#eclesiastes" class="book poeticos">Eclesiastes</a>
-                    <a href="#cantares" class="book poeticos">Cantares</a>
-                </div>
-            </div>
-            <div class="shelf-section">
-                <div class="section-title">Profetas Maiores</div>
-                <div class="books-container">
-                    <a href="#isaias" class="book profetas-maiores">Isaías</a>
-                    <a href="#jeremias" class="book profetas-maiores">Jeremias</a>
-                    <a href="#lamentacoes" class="book profetas-maiores">Lamentações</a>
-                    <a href="#ezequiel" class="book profetas-maiores">Ezequiel</a>
-                    <a href="#daniel" class="book profetas-maiores">Daniel</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Terceira Prateleira -->
-        <div class="shelf">
-            <div class="shelf-section">
-                <div class="section-title">Profetas Menores</div>
-                <div class="books-container">
-                    <a href="#oseias" class="book profetas-menores">Oséias</a>
-                    <a href="#joel" class="book profetas-menores">Joel</a>
-                    <a href="#amos" class="book profetas-menores">Amós</a>
-                    <a href="#obadias" class="book profetas-menores">Obadias</a>
-                    <a href="#jonas" class="book profetas-menores">Jonas</a>
-                    <a href="#miqueias" class="book profetas-menores">Miquéias</a>
-                    <a href="#naum" class="book profetas-menores">Naum</a>
-                    <a href="#habacuque" class="book profetas-menores">Habacuque</a>
-                    <a href="#sofonias" class="book profetas-menores">Sofonias</a>
-                    <a href="#ageu" class="book profetas-menores">Ageu</a>
-                    <a href="#zacarias" class="book profetas-menores">Zacarias</a>
-                    <a href="#malaquias" class="book profetas-menores">Malaquias</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quarta Prateleira -->
-        <div class="shelf">
-            <div class="shelf-section">
-                <div class="section-title">Evangelhos</div>
-                <div class="books-container">
-                    <a href="#mateus" class="book evangelhos">Mateus</a>
-                    <a href="#marcos" class="book evangelhos">Marcos</a>
-                    <a href="#lucas" class="book evangelhos">Lucas</a>
-                    <a href="#joao" class="book evangelhos">João</a>
-                </div>
-            </div>
-            <div class="shelf-section">
-                <div class="section-title">Histórico</div>
-                <div class="books-container">
-                    <a href="#atos_dos_apostolos" class="book historico-nt">Atos</a>
-                </div>
-            </div>
-            <div class="shelf-section">
-                <div class="section-title">Cartas Paulinas</div>
-                <div class="books-container">
-                    <a href="#romanos" class="book cartas-paulinas">Romanos</a>
-                    <a href="#1_corintios" class="book cartas-paulinas">I Coríntios</a>
-                    <a href="#2_corintios" class="book cartas-paulinas">II Coríntios</a>
-                    <a href="#galatas" class="book cartas-paulinas">Gálatas</a>
-                    <a href="#efesios" class="book cartas-paulinas">Efésios</a>
-                    <a href="#filipenses" class="book cartas-paulinas">Filipenses</a>
-                    <a href="#colossenses" class="book cartas-paulinas">Colossenses</a>
-                    <a href="#1_tessalonicenses" class="book cartas-paulinas">I Tessalonicenses</a>
-                    <a href="#2_tessalonicenses" class="book cartas-paulinas">II Tessalonicenses</a>
-                    <a href="#1_timoteo" class="book cartas-paulinas">I Timóteo</a>
-                    <a href="#2_timoteo" class="book cartas-paulinas">II Timóteo</a>
-                    <a href="#tito" class="book cartas-paulinas">Tito</a>
-                    <a href="#filemom" class="book cartas-paulinas">Filemom</a>
-                    <a href="#hebreus" class="book cartas-paulinas">Hebreus</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quinta Prateleira -->
-        <div class="shelf">
-            <div class="shelf-section">
-                <div class="section-title">Outras Cartas</div>
-                <div class="books-container">
-                    <a href="#tiago" class="book outras-cartas">Tiago</a>
-                    <a href="#1_pedro" class="book outras-cartas">I Pedro</a>
-                    <a href="#2_pedro" class="book outras-cartas">II Pedro</a>
-                    <a href="#1_joao" class="book outras-cartas">I João</a>
-                    <a href="#2_joao" class="book outras-cartas">II João</a>
-                    <a href="#3_joao" class="book outras-cartas">III João</a>
-                    <a href="#judas" class="book outras-cartas">Judas</a>
-                </div>
-            </div>
-            <div class="shelf-section">
-                <div class="section-title">Profético</div>
-                <div class="books-container">
-                    <a href="#apocalipse" class="book profetico">Apocalipse</a>
-                </div>
-            </div>
-            <div class="decoration clock">⏰</div>
-        </div>
+  <header>
+    <div class="logo-container">
+      <br>
+      <img src="Cia Daniel, Logo9.png" alt="Logo" class="logo" />
     </div>
+    <h1>📖 Hub de Estudos Bíblicos</h1>
+    <p>Explore conteúdos bíblicos com profundidade e simplicidade</p>
+  </header>
 
-    <!-- Rodapé -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>Sobre a Estante Bíblica</h3>
-                <p>Uma forma visual e intuitiva de navegar pelos 66 livros da Bíblia Sagrada. Explore o Antigo e Novo Testamento de maneira organizada, desde os livros do Pentateuco até as profecias do Apocalipse. Cada livro está categorizado para facilitar seu estudo e compreensão das Escrituras.</p>
-            </div>
-            
-            <div class="footer-section">
-                <h3>Links Úteis</h3>
-                <div class="footer-links">
-                    <a href="https://blogdozouza.wordpress.com/wp-content/uploads/2025/07/finalmente-entendo-a-biblia-e-book.pdf" class="footer-link" target="_blank">📚 Finalmente entendo a Bíblia</a>
-                    <a href="https://medium.com/estudo-da-biblia/entendendo-a-b%C3%ADblia-18dc41d7e16d" class="footer-link" target="_blank">📚 Entendendo a Bíblia</a>
-                    <a href="https://blogdozouza.wordpress.com/wp-content/uploads/2025/07/arquitetura-do-texto-biblico.png" class="footer-link" target="_blank">📚 Arquitetura do Texto Bíblico</a>
-                    <a href="https://blogdozouza.wordpress.com/wp-content/uploads/2025/07/escola-de-principios-marcos.pdf" class="footer-link" target="_blank">📚 Estudo Macro - Livro: Marcos</a>
-                    <a href=evangelhos_sinoticos.html class="footer-link" target="_blank">📚 Evangelhos Sinóticos</a>
-                    <a href=jewish_calendar_enhanced.html class="footer-link" target="_blank">📅 Calendário Judaíco</a>
-                    <a href="https://medium.com/estudo-da-biblia/os-5-minist%C3%A9rios-ab617ee876f" class="footer-link" target="_blank">📚 Os 5 ministérios</a>
-                    <a href="https://medium.com/estudo-da-biblia/as-7-%C3%A1reas-de-influ%C3%AAncia-28c8a27bc98b" class="footer-link" target="_blank">📚 As 7 Áreas de Influência</a>
-                    <a href="https://medium.com/estudo-da-biblia" class="footer-link" target="_blank">📚 Estudos Bíblicos</a>
-                    <!--<a href="#comentarios" class="footer-link">💬 Comentários</a> -->
-                </div>
-            </div>
+  <div class="section-title">📚 Links Úteis</div>
+  <div class="container">
+    <a href="https://blogdozouza.wordpress.com/wp-content/uploads/2025/07/finalmente-entendo-a-biblia-e-book.pdf" target="_blank" class="card">
+      <h3>🧠 Finalmente Entendo a Bíblia</h3>
+      <p>Uma jornada acessível para quem achava a Bíblia difícil de entender.</p>
+    </a>
+    <a href="https://medium.com/estudo-da-biblia/entendendo-a-b%C3%ADblia-18dc41d7e16d" target="_blank" class="card">
+      <h3>📘 Entendendo a Bíblia</h3>
+      <p>Fundamentos bíblicos com contexto histórico e aplicação prática.</p>
+    </a>
+    <a href="https://blogdozouza.wordpress.com/wp-content/uploads/2025/07/arquitetura-do-texto-biblico.png" target="_blank" class="card">
+      <h3>🏛️ Arquitetura do Texto Bíblico</h3>
+      <p>Compreenda como a Bíblia foi formada e estruturada ao longo da história.</p>
+    </a>
+    <a href="https://blogdozouza.wordpress.com/wp-content/uploads/2025/07/escola-de-principios-marcos.pdf" target="_blank" class="card">
+      <h3>📖 Estudo Macro - Marcos</h3>
+      <p>Visão panorâmica e teológica do Evangelho segundo Marcos.</p>
+    </a>
+    <a href=evangelhos_sinoticos.html target="_blank" class="card">
+      <h3>🔍 Evangelhos Sinóticos</h3>
+      <p>Comparação entre Mateus, Marcos e Lucas: semelhanças e contrastes.</p>
+    </a>
+    <a href=jewish_calendar_enhanced.html target="_blank" class="card">
+      <h3>🗓️ Calendário Judaico</h3>
+      <p>Conheça as datas, festas e ciclos sagrados do povo de Israel.</p>
+    </a>
+    <a href="https://medium.com/estudo-da-biblia/os-5-minist%C3%A9rios-ab617ee876f" target="_blank" class="card">
+      <h3>🕊️ Os 5 Ministérios</h3>
+      <p>Funções ministeriais conforme Efésios 4:11: apóstolo, profeta, mestre, etc.</p>
+    </a>
+    <a href="https://medium.com/estudo-da-biblia/as-7-%C3%A1reas-de-influ%C3%AAncia-28c8a27bc98b" target="_blank" class="card">
+      <h3>🏔️ As 7 Áreas de Influência</h3>
+      <p>O papel do cristão nas esferas da sociedade (mídia, governo, etc).</p>
+    </a>
+    <a href="https://medium.com/estudo-da-bibli" target="_blank" class="card">
+      <h3>📚 Estudos Bíblicos</h3>
+      <p>Estudos temáticos e devocionais para sua edificação espiritual.</p>
+    </a>
+    <a href=estante_biblica.html target="_blank" class="card">
+      <h3>📚 Estante Bíblica</h3>
+      <p>Livros, comentários e ferramentas para aprofundar seu estudo bíblico.</p>
+    </a>
+  </div>
 
-            <div class="footer-section">
-                <h3>Nossos Agentes</h3>
-                <div class="footer-links">
-                    <a href="https://chatgpt.com/g/g-6776fcfea0c0819199ca6427acf99051-estudando-a-biblia" class="footer-link" target="_blank">💬 Estudando a Bíblia</a>
-                    <a href="https://chatgpt.com/g/g-688b752c470081919845463879eb9289-palavra-raiz-hebraica" class="footer-link" target="_blank">💬 Palavra & Raiz Hebraica</a>
-                </div>
-            </div>
-            
-            <div class="footer-section">
-                <h3>Redes Sociais</h3>
-                <div class="social-links">
-                    <a href="https://www.instagram.com/ministeriociadedaniel/" class="social-link instagram" target="_blank">
-                      <i class="fab fa-instagram"></i>
-                    </a>
-                    <a href="https://www.youtube.com/@ministeriociadedaniel" class="social-link youtube" target="_blank">
-                      <i class="fab fa-youtube"></i>
-                    </a>
+  <div class="section-title">💬 Nossos Agentes</div>
+  <div class="container">
+    <a href="https://chatgpt.com/g/g-6776fcfea0c0819199ca6427acf99051-estudando-a-biblia" class="card">
+      <h3>🤖 Estudando a Bíblia</h3>
+      <p>Agente inteligente para tirar dúvidas sobre passagens bíblicas em tempo real.</p>
+    </a>
+    <a href="https://chatgpt.com/g/g-688b752c470081919845463879eb9289-palavra-raiz-hebraica" class="card">
+      <h3>🧬 Palavra & Raiz Hebraica</h3>
+      <p>Descubra significados profundos das palavras no hebraico original.</p>
+    </a>
+  </div>
 
-                    <!--
-                    <a href="https://www.instagram.com/ministeriociadedaniel/" class="social-link instagram" title="Instagram" target="_blank">📷</a>
-                    <a href="https://www.youtube.com/@ministeriociadedaniel" class="social-link youtube" title="YouTube" target="_blank">📺</a>
-                    <a href="#" class="social-link facebook" title="Facebook">📘</a>
-                    <a href="#" class="social-link twitter" title="Twitter">🐦</a>
-                    <a href="#" class="social-link whatsapp" title="WhatsApp">📱</a>
-                    -->
-                </div>
-            </div>
-        </div>
-        
-        <div class="footer-bottom">
-            <p>&copy; 2025 Estante Bíblica. Todos os direitos reservados.</p>
-            <p>Criado com 💙 para edificação e estudo da Palavra de Deus</p>
-        </div>
-    </footer>
+  <footer>
+    <p><strong>Sobre o Hub:</strong> Criado para quem deseja aprofundar-se nas Escrituras com clareza, contexto e fé.</p>
+    <div class="social-icons">
+      <a href="https://www.instagram.com/ministeriociadedaniel/" target="_blank">Instagram</a> |
+      <a href="https://www.youtube.com/@ministeriociadedaniel" target="_blank">YouTube</a> |
+      <!-- <a href="https://linktr.ee/data.z" target="_blank">Linktree</a> -->
+    </div>
+    <p>&copy; 2025 | Todos os direitos reservados</p>
+  </footer>
 
-    <script>
-        // Adicionar funcionalidade aos links dos livros
-        document.querySelectorAll('.book').forEach(book => {
-            book.addEventListener('click', function(e) {
-                e.preventDefault();
-                const bookName = this.textContent;
-                const bookId = this.getAttribute('href').substring(1);
-                
-                // Aqui você pode implementar a lógica para abrir o livro
-                // Por exemplo, redirecionar para uma página específica ou abrir um modal
-                //alert(`Você clicou no livro: ${bookName}`);
-                
-                // Exemplo de redirecionamento (descomente para usar):
-                // window.location.href = `livro.html?book=${bookId}`;
-                
-                // Ou abrir em nova aba:
-                window.open(`https://www.bibliaon.com/${bookId}`, '_blank');
-            });
-        });
-
-        // Adicionar efeito de hover nas prateleiras
-        document.querySelectorAll('.shelf').forEach(shelf => {
-            shelf.addEventListener('mouseenter', function() {
-                this.style.backgroundColor = '#f0f0f0';
-            });
-            
-            shelf.addEventListener('mouseleave', function() {
-                this.style.backgroundColor = '#f9f9f9';
-            });
-        });
-    </script>
 </body>
 </html>
