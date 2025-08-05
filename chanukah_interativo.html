@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Chanukiá Interativa</title>
+  <link rel="icon" href="hanukkah.png" type="image/png">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{--candle:#4e8bd1;--candle-off:#cfd6df;--flame:orange;--metal:#7a6238}
+    body {
+      background:#fefbe9 url('https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Hanukkah_menorah.svg/1920px-Hanukkah_menorah.svg.png') no-repeat center bottom;
+      background-size: contain;
+      font-family: Arial, sans-serif;
+      text-align:center;
+      padding:20px;
+    }
+    h1 { color:#2c3e50; margin-bottom:8px }
+    .wrap{max-width:900px;margin:0 auto}
+    .menorah {
+      display:flex;
+      justify-content:center;
+      align-items:flex-end;
+      gap:16px;
+      margin:26px auto 0;
+      padding:16px 12px 60px;
+      border-bottom:10px solid var(--metal);
+    }
+    .menorah-base {
+      width:100%;
+      height:26px;
+      background:var(--metal);
+      border-radius:12px;
+      margin-top:10px;
+    }
+    .holder{ width:22px; height:18px; background:var(--metal); border-radius:6px 6px 0 0; position:relative }
+    .candle { width:18px; background:var(--candle-off); border-radius:4px; margin:0 auto; position:relative; transition:height .25s ease, background .25s ease, opacity .25s ease }
+    .candle.lit{ background:var(--candle) }
+    .flame { position:absolute; top:-18px; left:50%; transform:translateX(-50%); width:12px; height:18px; background:var(--flame); border-radius:50% 50% 50% 50%; display:none; box-shadow:0 0 12px var(--flame) }
+    .candle.lit .flame{ display:block }
+    .controls{ display:flex; gap:10px; justify-content:center; margin:30px 0 0 }
+    button{ padding:10px 16px; border:none; border-radius:8px; background:#d35400; color:#fff; font-size:15px; cursor:pointer }
+    button.secondary{ background:#7f8c8d }
+    #bencao{ margin:20px auto 0; font-style:italic; max-width:720px; white-space:pre-line; line-height:1.4 }
+    #dia-atual{ font-weight:bold }
+    footer {
+      margin-top:40px;
+      padding:20px;
+      background-color:rgba(255, 255, 255, 0.85);
+      font-size:14px;
+      color:#333;
+      border-radius:8px;
+    }
+    footer a {
+      color:#2c3e50;
+      margin:0 8px;
+      text-decoration:none;
+    }
+    footer a:hover {
+      text-decoration:underline;
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🕎 Ritual Interativo de Chanucá</h1>
+  <p>Dia atual: <span id="dia-atual">0</span> / 8</p>
+
+  <div class="menorah" id="menorah"></div>
+  <div class="menorah-base"></div>
+
+  <div class="controls">
+    <button id="acender-btn">Acender vela de hoje</button>
+    <button id="reiniciar-btn" class="secondary">Reiniciar</button>
+  </div>
+
+  <div id="bencao"></div>
+
+  <audio id="musica" src="https://www.bensound.com/bensound-music/bensound-sunny.mp3"></audio>
+
+  <div style="text-align: center; margin-top: 30px;">
+      <a href="https://aasouzaconsult.github.io/biblia/" target="_blank">
+          <img src="Cia Daniel, Logo7.png" alt="Logo Cia Daniel" style="max-height: 80px;">
+      </a>
+  </div>
+
+  <footer>
+    <p><strong>Sobre a Chanucá:</strong> Criado para celebrar e lembrar o milagre da luz, preservando a tradição e fortalecendo a fé.</p>
+    <p>
+      <a href="#">Instagram</a> |
+      <a href="#">YouTube</a>
+    </p>
+    <p>© 2025 | Todos os direitos reservados</p>
+  </footer>
+</div>
+
+<script>
+  const menorah = document.getElementById('menorah');
+  const diaSpan = document.getElementById('dia-atual');
+  const acenderBtn = document.getElementById('acender-btn');
+  const resetBtn = document.getElementById('reiniciar-btn');
+  const bencaoBox = document.getElementById('bencao');
+  const musica = document.getElementById('musica');
+
+  const TOTAL_DIAS = 8;
+  const SHAMASH = 4;
+  const ORDEM_POSICIONAR = [8,7,6,5,3,2,1,0];
+
+  let dia = parseInt(localStorage.getItem('chanukaDia') || '0', 10);
+
+  function getBlessingText(d){
+    if(d === 0){
+      return 'Clique em “Acender vela de hoje”. O shamash (central) permanece aceso todos os dias.';
+    }
+    const b1 = 'Bendito és Tu, Senhor nosso Deus, Rei do universo, que nos santificaste com os Teus mandamentos e nos ordenaste acender a luz de Chanucá.';
+    const b2 = 'Bendito és Tu, Senhor nosso Deus, Rei do universo, que operaste milagres para nossos antepassados, naqueles dias, nesta época.';
+    const b3 = 'Bendito és Tu, Senhor nosso Deus, Rei do universo, que nos concedeu vida, nos sustentou e nos fez chegar a esta ocasião.';
+    return (d === 1) ? `${b1}\n\n${b2}\n\n${b3}` : `${b1}\n\n${b2}`;
+  }
+
+  function idadeDaVela(index){
+    const pos = ORDEM_POSICIONAR.indexOf(index);
+    if(pos === -1) return null;
+    if(pos > dia - 1) return null;
+    return (dia - 1) - pos;
+  }
+
+  function alturaDaVela(index){
+    const base = 90;
+    const decr = 10;
+    const minH = 40;
+    if(index === SHAMASH) return 110;
+    const idade = idadeDaVela(index);
+    if(idade === null) return base;
+    const h = base - Math.max(0, idade) * decr;
+    return Math.max(minH, h);
+  }
+
+  function estaAcesa(index){
+    if(index === SHAMASH) return true;
+    const pos = ORDEM_POSICIONAR.indexOf(index);
+    return pos !== -1 && pos <= (dia - 1);
+  }
+
+  function render(){
+    menorah.innerHTML = '';
+    for(let i=0;i<9;i++){
+      const holder = document.createElement('div');
+      holder.className = 'holder';
+
+      const candle = document.createElement('div');
+      candle.className = 'candle' + (estaAcesa(i) ? ' lit' : '');
+      candle.style.height = alturaDaVela(i) + 'px';
+
+      const flame = document.createElement('div');
+      flame.className = 'flame';
+      candle.appendChild(flame);
+
+      holder.appendChild(candle);
+      menorah.appendChild(holder);
+    }
+    diaSpan.textContent = dia;
+    bencaoBox.textContent = getBlessingText(dia);
+  }
+
+  acenderBtn.addEventListener('click', () => {
+    if(dia >= TOTAL_DIAS){
+      alert('Todas as velas já foram acesas!');
+      return;
+    }
+    dia += 1;
+    localStorage.setItem('chanukaDia', String(dia));
+    render();
+    musica.currentTime = 0;
+    musica.play();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    dia = 0;
+    localStorage.setItem('chanukaDia', '0');
+    musica.pause();
+    musica.currentTime = 0;
+    render();
+  });
+
+  render();
+</script>
+</body>
+</html>
