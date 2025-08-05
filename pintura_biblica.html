@@ -121,6 +121,25 @@
     .tabs{justify-content:center;}
     .tab{font-size:14px; padding:8px;}
   }
+
+  /* Ajuste para descrição não sobrepor a imagem no celular */
+  @media (max-width:768px){
+    .canvas-caption{
+      position:relative;
+      left:auto;
+      bottom:auto;
+      transform:none;
+      margin-top:8px;
+      max-width:100%;
+      background:#ffffffdd;
+    }
+    .stage{
+      flex-direction:column;
+    }
+    .canvas-card{
+      margin-bottom:0;
+    }
+  }
 </style>
 </head>
 <body>
