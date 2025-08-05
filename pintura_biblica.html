@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Pintura Bíblica – Clique para Colorir</title>
+<style>
+  /* Estilos gerais */
+  :root{
+    --bg:#0e2a3f; --panel:#123a57; --card:#0f304a; --ink:#111; --muted:#9ec3db;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:system-ui, Segoe UI, Roboto, sans-serif; color:#fff;
+    background: radial-gradient(1200px 700px at 10% -10%, #134b73 0%, #0b2436 55%, #081a28 100%);
+    min-height:100svh; display:flex; flex-direction:column; gap:16px;
+  }
+  header{
+    padding:16px 20px; display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;
+  }
+  .title{font-weight:700; letter-spacing:.2px; font-size:clamp(18px,2.6vw,24px)}
+  .toolbar{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .palette{display:flex; gap:8px; padding:8px; border-radius:999px; background:#0b314c99; backdrop-filter: blur(6px)}
+  .sw{width:26px; height:26px; border-radius:50%; border:2px solid #ffffffcc; cursor:pointer; outline:2px solid transparent}
+  .sw[aria-selected="true"]{outline-color:#fff}
+  .badge{
+    padding:6px 10px; border-radius:999px; background:#0b314c; color:#cfe9fb; font-size:12px; border:1px solid #1a4f72;
+  }
+  button, .tab{cursor:pointer; border:none; border-radius:10px; padding:10px 14px; color:#0b2233; background:#cfe9fb; font-weight:600}
+  button.secondary{background:#99c7df}
+  button.danger{background:#ffdbdb; color:#5c0e0e}
+  button:active{filter:brightness(.95)}
+  main{display:grid; grid-template-columns: 260px 1fr; gap:16px; padding:0 20px 20px; flex:1}
+  @media (max-width:960px){ main{grid-template-columns:1fr} .sidebar{order:2}}
+  .sidebar{
+    background:#0b314c80; border:1px solid #1a4f72; border-radius:var(--radius); padding:14px; display:flex; flex-direction:column; gap:10px; max-height:600px; overflow-y:auto;
+  }
+  .tabs{display:flex; flex-direction:column; gap:8px}
+  .tab{background:#0f304a; color:#cfe9fb; border:1px solid #1a4f72; text-align:left}
+  .tab[aria-selected="true"]{background:#cfe9fb; color:#0b2233}
+  .stage{
+    background:#0b314c80; border:1px solid #1a4f72; border-radius:var(--radius);
+    display:flex; align-items:center; justify-content:center; padding:12px; position:relative; min-height:440px;
+  }
+  .canvas-card{
+    background:#fff; color:#111; border-radius:14px; width:min(900px,100%); aspect-ratio:4/3; display:grid; place-items:center;
+    box-shadow: 0 10px 30px #0006; overflow:hidden; padding:10px;
+  }
+  .scene{display:none; width:100%; height:100%}
+  .scene[aria-hidden="false"]{display:block}
+  svg{width:100%; height:100%}
+  .paintable{cursor:pointer; transition:filter .1s ease}
+  .paintable:hover{filter:brightness(1.07)}
+  footer{padding:8px 20px; color:#cfe9fb; font-size:12px}
+  .links a{color:#9fd2f3; text-decoration:none}
+
+  /* Sobreposição de descrição dentro da área de desenho */
+  .canvas-caption{
+    position:absolute;
+    left:50%;
+    bottom:14px;
+    transform:translateX(-50%);
+    max-width:92%;
+    background:#ffffffdd;
+    color:#111;
+    font-size:14px;
+    line-height:1.35;
+    border-radius:10px;
+    padding:8px 10px;
+    box-shadow:0 6px 18px #0004;
+    border:1px solid #1a4f72;
+    backdrop-filter: blur(4px);
+  }
+  .canvas-caption b{font-weight:700}
+
+  /* Logo pequeno abaixo das cenas */
+  #logo-container{
+    text-align:center;
+    margin-top:10px;
+  }
+  #logo-container img{
+    max-width:80px;
+    height:auto;
+    opacity:0.9;
+  }
+
+  /* Responsividade extra */
+  @media (max-width:768px){
+    main{grid-template-columns:1fr !important;}
+    .stage{min-height:auto;}
+    .canvas-card{aspect-ratio:auto; width:100%;}
+    .canvas-caption{font-size:13px; padding:6px 8px;}
+    #logo-container img{max-width:60px;}
+  }
+  @media (max-width:480px){
+    .toolbar{flex-direction:column; gap:6px;}
+    .palette{flex-wrap:wrap; justify-content:center;}
+    button, .tab{padding:8px 10px; font-size:14px;}
+    .tabs{flex-direction:row; flex-wrap:wrap; gap:4px;}
+    .sidebar{max-height:none;}
+    #logo-container img{max-width:50px;}
+  }
+
+  /* Logo no topo à direita */
+  header{display:flex; align-items:center; justify-content:space-between;}
+  #logo-container{margin-left:auto;}
+  #logo-container img{
+    max-width:60px;
+    height:auto;
+  }
+
+  /* Menu das cenas sem rolagem */
+  .sidebar{max-height:none; overflow-y:visible;}
+  .tabs{display:flex; flex-wrap:wrap; gap:6px;}
+  .tab{flex:1 1 auto; white-space:nowrap;}
+
+  @media (max-width:768px){
+    #logo-container img{max-width:50px;}
+    .tabs{justify-content:center;}
+    .tab{font-size:14px; padding:8px;}
+  }
+</style>
+</head>
+<body>
+<header>
+<div class="title">🎨 Pintura Bíblica – Clique para Colorir</div>
+<div class="toolbar">
+<div aria-label="paleta de cores" class="palette" id="palette" role="radiogroup"></div>
+<span class="badge" id="cur">Cor atual: <b>#F44336</b></span>
+<button class="secondary" id="clear">Limpar Cena</button>
+<button id="save">Salvar como PNG</button>
+</div>
+<div id="logo-container"><img alt="Logo Pintura Bíblica" src="Cia Daniel, Logo9.png"/></div></header>
+<main>
+<aside class="sidebar">
+<div style="font-weight:700; margin-bottom:6px">Cenas</div>
+<div class="tabs" id="tabs">
+<button aria-selected="true" class="tab" data-scene="fogueira" title="Uma fogueira quentinha com pedras ao redor. Lembra a história em que Deus falou com Moisés na sarça ardente.">🔥 Fogueira</button>
+<button class="tab" data-scene="arca" title="A Arca de Noé flutuando nas águas. Deus prometeu cuidar de nós, como mostrou com o arco‑íris.">🌈 Arca (simples)</button>
+<button class="tab" data-scene="jardim" title="Um jardim com uma árvore cheia de frutinhas, um coelhinho e um passarinho.">🌳 Jardim</button>
+<button class="tab" data-scene="baleia" title="Jonas e a grande baleia no mar. Deus cuidou de Jonas mesmo quando ele errou.">🐋 Baleia e Jonas</button>
+<button class="tab" data-scene="jesuscriancas" title="Jesus recebendo as crianças com carinho. Ele disse: “Deixem as crianças virem a mim”.">👶 Jesus e Crianças</button>
+<button class="tab" data-scene="moises" title="Moisés com o mar se abrindo para o povo passar com segurança.">🌊 Moisés e o Mar</button>
+<button class="tab" data-scene="deserto" title="Dunas de areia e uma palmeira no deserto. Deus guia a gente mesmo em lugares difíceis.">🏜️ Deserto</button>
+<button class="tab" data-scene="paespeixes" title="Cinco pães e dois peixinhos em um cesto. Jesus multiplicou e alimentou muita gente.">🍞 5 Pães e 2 Peixes</button>
+<button class="tab" data-scene="pescaria" title="Um barquinho no mar e peixinhos nadando. Parece um dia de pescaria com os amigos de Jesus.">⛵ Barco e Pescaria</button>
+<button class="tab" data-scene="andando" title="Jesus andando por cima das ondas. Ele acalma nosso medo.">🚶‍♂️ Andando sobre o Mar</button>
+<button class="tab" data-scene="mandamentos" title="Duas tábuas com os Dez Mandamentos, os conselhos de Deus para vivermos bem.">📜 10 Mandamentos</button>
+<button class="tab" data-scene="abraco" title="Dois amigos dando um abraço. Deus gosta quando somos gentis e amigos.">🤝 Abraço Entre Amigos</button>
+<button class="tab" data-scene="biblia" title="A Bíblia aberta, nosso livro especial para conhecer o amor de Deus.">📖 Bíblia</button>
+</div>
+<div id="hint" style="margin-top:8px; color:#cfe9fb; font-size:13px">
+        Dica: escolha a cor na paleta e <b>clique</b> na parte do desenho para preencher.
+      </div>
+</aside>
+<section class="stage">
+<div class="canvas-card">
+<!-- Cena 1: FOGUEIRA (sarça estilizada) -->
+<svg aria-hidden="false" class="scene" id="scene-fogueira" viewbox="0 0 800 600"><title>Fogueira</title><desc>Uma fogueira quentinha com pedras ao redor. Lembra a história em que Deus falou com Moisés na sarça ardente.</desc>
+<rect class="paintable" data-group="fundo" fill="#fff" height="600" width="800" x="0" y="0"></rect>
+<g fill="none" stroke="#111" stroke-width="4">
+<polyline points="80,420 220,240 360,420"></polyline>
+<polyline points="320,420 520,270 720,420"></polyline>
+<line x1="60" x2="740" y1="420" y2="420"></line><g stroke="#111" stroke-width="0"><rect class="paintable" data-group="chao" fill="#ffffff" height="60" width="680" x="60" y="420"></rect></g>
+</g><g stroke="#111" stroke-width="4"><polygon class="paintable" data-group="montanha" fill="#ffffff" points="80,420 220,240 360,420"></polygon><polygon class="paintable" data-group="montanha" fill="#ffffff" points="320,420 520,270 720,420"></polygon></g>
+<g stroke="#111" stroke-width="4">
+<ellipse class="paintable" cx="330" cy="470" data-group="pedra" fill="#ffffff" rx="70" ry="45"></ellipse>
+<ellipse class="paintable" cx="420" cy="485" data-group="pedra" fill="#ffffff" rx="58" ry="40"></ellipse>
+<ellipse class="paintable" cx="510" cy="470" data-group="pedra" fill="#ffffff" rx="65" ry="44"></ellipse>
+<ellipse class="paintable" cx="270" cy="500" data-group="pedra" fill="#ffffff" rx="48" ry="33"></ellipse>
+<ellipse class="paintable" cx="570" cy="500" data-group="pedra" fill="#ffffff" rx="48" ry="33"></ellipse>
+</g>
+<g stroke="#111" stroke-width="4">
+<path class="paintable" d="M400 520 C380 480, 360 460, 360 420 C360 380, 390 360, 390 330 C360 350, 340 380, 335 415 C330 450, 350 490, 375 520 Z" data-group="chama" fill="#ffffff"></path>
+<path class="paintable" d="M400 520 C420 480, 450 460, 450 410 C450 370, 420 340, 420 300 C460 330, 485 370, 485 410 C485 455, 455 495, 425 520 Z" data-group="chama" fill="#ffffff"></path>
+<path class="paintable" d="M400 520 C395 500, 395 480, 400 455 C405 430, 420 410, 420 385 C400 400, 385 425, 380 450 C375 475, 380 500, 390 520 Z" data-group="chama" fill="#ffffff"></path>
+</g>
+</svg>
+<!-- Cena 2: ARCA (simples e “colorível”) -->
+<svg aria-hidden="true" class="scene" id="scene-arca" viewbox="0 0 800 600"><title>Arca</title><desc>A Arca de Noé flutuando nas águas. Deus prometeu cuidar de nós, como mostrou com o arco‑íris.</desc>
+<rect class="paintable" data-group="fundo" fill="#fff" height="600" width="800" x="0" y="0"></rect>
+<g fill="none" stroke="#111" stroke-width="4">
+<path class="paintable" d="M150,260 A250,180 0 0 1 650,260" data-group="arco" data-subtype="stroke" stroke="#111" stroke-width="6"></path>
+<path class="paintable" d="M170,260 A230,160 0 0 1 630,260" data-group="arco" data-subtype="stroke" stroke="#111" stroke-width="6"></path>
+<path class="paintable" d="M190,260 A210,140 0 0 1 610,260" data-group="arco" data-subtype="stroke" stroke="#111" stroke-width="6"></path>
+<path class="paintable" d="M210,260 A190,120 0 0 1 590,260" data-group="arco" data-subtype="stroke" stroke="#111" stroke-width="6"></path>
+</g>
+<g stroke="#111" stroke-width="4">
+<path class="paintable" d="M220,360 Q400,460 580,360 L580,330 L220,330 Z" data-group="casco" fill="#ffffff"></path>
+<line x1="240" x2="560" y1="345" y2="345"></line>
+<line x1="260" x2="540" y1="355" y2="355"></line>
+<line x1="280" x2="520" y1="365" y2="365"></line>
+</g>
+<g stroke="#111" stroke-width="4">
+<path class="paintable" d="M120,420 Q170,400 220,420 T320,420 T420,420 T520,420 T620,420" data-group="agua" fill="#ffffff"></path>
+<path class="paintable" d="M140,450 Q190,430 240,450 T340,450 T440,450 T540,450 T640,450" data-group="agua" fill="#ffffff"></path>
+<path class="paintable" d="M160,480 Q210,460 260,480 T360,480 T460,480 T560,480 T660,480" data-group="agua" fill="#ffffff"></path>
+</g>
+<g stroke="#111" stroke-width="4">
+<rect class="paintable" data-group="conves" fill="#ffffff" height="40" width="160" x="320" y="300"></rect>
+<polygon class="paintable" data-group="conves" fill="#ffffff" points="320,300 400,260 480,300"></polygon>
+</g>
+</svg>
+<!-- Cena 3: JARDIM (árvore e animais simples) -->
+<svg aria-hidden="true" class="scene" id="scene-jardim" viewbox="0 0 800 600"><title>Jardim</title><desc>Um jardim com uma árvore cheia de frutinhas, um coelhinho e um passarinho.</desc>
+<rect class="paintable" data-group="fundo" fill="#fff" height="600" width="800" x="0" y="0"></rect>
+<g fill="none" stroke="#111" stroke-width="4">
+<path d="M40,420 Q200,340 360,420 T680,420"></path>
+</g>
+<g stroke="#111" stroke-width="4">
+<rect class="paintable" data-group="tronco" fill="#ffffff" height="90" rx="6" width="44" x="370" y="350"></rect>
+<circle class="paintable" cx="392" cy="300" data-group="copa" fill="#ffffff" r="90"></circle>
+<circle class="paintable" cx="352" cy="280" data-group="fruto" fill="#ffffff" r="14"></circle>
+<circle class="paintable" cx="392" cy="250" data-group="fruto" fill="#ffffff" r="14"></circle>
+<circle class="paintable" cx="432" cy="285" data-group="fruto" fill="#ffffff" r="14"></circle>
+</g>
+<g stroke="#111" stroke-width="4">
+<ellipse class="paintable" cx="250" cy="455" data-group="coelho" fill="#ffffff" rx="26" ry="20"></ellipse>
+<circle class="paintable" cx="233" cy="440" data-group="coelho" fill="#ffffff" r="12"></circle>
+<ellipse class="paintable" cx="520" cy="430" data-group="passaro" fill="#ffffff" rx="16" ry="12"></ellipse>
+</g>
+</svg>
+<!-- Cena 4: BALEIA E JONAS -->
+<svg aria-hidden="true" class="scene" id="scene-baleia" viewbox="0 0 800 600"><title>Baleia</title><desc>Jonas e a grande baleia no mar. Deus cuidou de Jonas mesmo quando ele errou.</desc>
+<rect class="paintable" data-group="fundo" fill="#fff" height="600" width="800" x="0" y="0"></rect>
+<g stroke="#111" stroke-width="4">
+<ellipse class="paintable" cx="350" cy="350" data-group="baleia-corpo" fill="#ffffff" rx="220" ry="100"></ellipse>
+<polygon class="paintable" data-group="baleia-cauda" fill="#ffffff" points="570,350 650,300 650,400"></polygon>
+<ellipse class="paintable" cx="200" cy="370" data-group="baleia-barbatana" fill="#ffffff" rx="60" ry="25"></ellipse>
+<circle class="paintable" cx="370" cy="330" data-group="jonas-cabeca" fill="#ffffff" r="20"></circle>
+<rect class="paintable" data-group="jonas-corpo" fill="#ffffff" height="40" width="30" x="355" y="350"></rect>
+</g>
+</svg>
+<!-- Cena 5: JESUS E AS CRIANÇAS -->
+<svg aria-hidden="true" class="scene" id="scene-jesuscriancas" viewbox="0 0 800 600"><title>Jesuscriancas</title><desc>Jesus recebendo as crianças com carinho. Ele disse: “Deixem as crianças virem a mim”.</desc>
+<rect class="paintable" data-group="fundo" fill="#fff" height="600" width="800" x="0" y="0"></rect>
+<g stroke="#111" stroke-width="4">
+<!-- Jesus -->
+<circle class="paintable" cx="400" cy="280" data-group="jesus-cabeca" fill="#ffffff" r="28"></circle>
+<rect class="paintable" data-group="jesus-corpo" fill="#ffffff" height="90" width="56" x="372" y="310"></rect>
+<!-- Crianças -->
+<circle class="paintable" cx="300" cy="320" data-group="crianca1-cabeca" fill="#ffffff" r="18"></circle>
+<rect class="paintable" data-group="crianca1-corpo" fill="#ffffff" height="60" width="30" x="285" y="338"></rect>
+<circle class="paintable" cx="500" cy="320" data-group="crianca2-cabeca" fill="#ffffff" r="18"></circle>
+<rect class="paintable" data-group="crianca2-corpo" fill="#ffffff" height="60" width="30" x="485" y="338"></rect>
+<circle class="paintable" cx="350" cy="340" data-group="crianca3-cabeca" fill="#ffffff" r="16"></circle>
+<rect class="paintable" data-group="crianca3-corpo" fill="#ffffff" height="50" width="30" x="335" y="356"></rect>
+</g>
+</svg>
+<!-- Cena 6: MOISÉS E O MAR SE ABRINDO -->
+<svg aria-hidden="true" class="scene" id="scene-moises" viewbox="0 0 800 600"><title>Moises</title><desc>Moisés com o mar se abrindo para o povo passar com segurança.</desc>
+<rect class="paintable" data-group="fundo" fill="#fff" height="600" width="800" x="0" y="0"></rect>
+<g stroke="#111" stroke-width="4">
+<!-- Ondas -->
+<path class="paintable" d="M100,420 Q200,300 300,420 L300,520 L100,520 Z" data-group="onda-esquerda" fill="#ffffff"></path>
+<path class="paintable" d="M500,420 Q600,300 700,420 L700,520 L500,520 Z" data-group="onda-direita" fill="#ffffff"></path>
+<!-- Moisés -->
+<circle class="paintable" cx="400" cy="320" data-group="moises-cabeca" fill="#ffffff" r="20"></circle>
+<rect class="paintable" data-group="moises-corpo" fill="#ffffff" height="90" width="40" x="380" y="340"></rect>
+</g>
+</svg>
+<!-- Cena 7: DESERTO -->
+<svg aria-hidden="true" class="scene" id="scene-deserto" viewbox="0 0 800 600"><title>Deserto</title><desc>Dunas de areia e uma palmeira no deserto. Deus guia a gente mesmo em lugares difíceis.</desc>
+<rect class="paintable" data-group="fundo" fill="#fff" height="600" width="800" x="0" y="0"></rect>
+<g stroke="#111" stroke-width="4">
+<!-- Dunas -->
+<path class="paintable" d="M0,470 Q150,380 300,470 T600,470 L600,540 L0,540 Z" data-group="duna1" fill="#ffffff"></path>
+<path class="paintable" d="M200,520 Q350,430 500,520 T900,520 L900,600 L200,600 Z" data-group="duna2" fill="#ffffff"></path>
+<!-- Palmeira -->
+<rect class="paintable" data-group="palmeira-tronco" fill="#ffffff" height="80" width="20" x="580" y="350"></rect>
+<circle class="paintable" cx="590" cy="320" data-group="palmeira-folhas" fill="#ffffff" r="40"></circle>
+</g>
+</svg>
+<!-- Cena 8: 5 PÃES E 2 PEIXES -->
+<svg aria-hidden="true" class="scene" id="scene-paespeixes" viewbox="0 0 800 600"><title>Paespeixes</title><desc>Cinco pães e dois peixinhos em um cesto. Jesus multiplicou e alimentou muita gente.</desc>
+<rect class="paintable" data-group="fundo" fill="#fff" height="600" width="800" x="0" y="0"></rect>
+<g stroke="#111" stroke-width="4">
+<!-- Cesto -->
+<rect class="paintable" data-group="cesto" fill="#ffffff" height="80" rx="40" width="300" x="250" y="380"></rect>
+<!-- Pães -->
+<ellipse class="paintable" cx="300" cy="360" data-group="pao1" fill="#ffffff" rx="45" ry="25"></ellipse>
+<ellipse class="paintable" cx="370" cy="350" data-group="pao2" fill="#ffffff" rx="45" ry="25"></ellipse>
+<ellipse class="paintable" cx="440" cy="345" data-group="pao3" fill="#ffffff" rx="45" ry="25"></ellipse>
+<ellipse class="paintable" cx="510" cy="350" data-group="pao4" fill="#ffffff" rx="45" ry="25"></ellipse>
+<ellipse class="paintable" cx="580" cy="360" data-group="pao5" fill="#ffffff" rx="45" ry="25"></ellipse>
+<!-- Peixes -->
+<ellipse class="paintable" cx="320" cy="430" data-group="peixe1-corpo" fill="#ffffff" rx="35" ry="18"></ellipse>
+<polygon class="paintable" data-group="peixe1-cauda" fill="#ffffff" points="355,430 380,415 380,445"></polygon>
+<ellipse class="paintable" cx="480" cy="430" data-group="peixe2-corpo" fill="#ffffff" rx="35" ry="18"></ellipse>
+<polygon class="paintable" data-group="peixe2-cauda" fill="#ffffff" points="445,430 420,415 420,445"></polygon>
+</g>
+</svg>
+<!-- Cena 9: BARCO E PESCARIA -->
+<svg aria-hidden="true" class="scene" id="scene-pescaria" viewbox="0 0 800 600"><title>Pescaria</title><desc>Um barquinho no mar e peixinhos nadando. Parece um dia de pescaria com os amigos de Jesus.</desc>
+<rect class="paintable" data-group="fundo" fill="#fff" height="600" width="800" x="0" y="0"></rect>
+<g stroke="#111" stroke-width="4">
+<!-- Barco -->
+<path class="paintable" d="M200,400 Q400,460 600,400 L550,350 L250,350 Z" data-group="barco" fill="#ffffff"></path>
+<!-- Água -->
+<path class="paintable" d="M0,470 Q100,450 200,470 T400,470 T600,470 T800,470 L800,520 L0,520 Z" data-group="agua1" fill="#ffffff"></path>
+<path class="paintable" d="M0,510 Q100,490 200,510 T400,510 T600,510 T800,510 L800,560 L0,560 Z" data-group="agua2" fill="#ffffff"></path>
+<!-- Peixe -->
+<ellipse class="paintable" cx="500" cy="440" data-group="peixe" fill="#ffffff" rx="30" ry="15"></ellipse>
+<polygon class="paintable" data-group="peixe-cauda" fill="#ffffff" points="530,440 550,430 550,450"></polygon>
+</g>
+</svg>
+<!-- Cena 10: ANDANDO SOBRE O MAR -->
+<svg aria-hidden="true" class="scene" id="scene-andando" viewbox="0 0 800 600"><title>Andando</title><desc>Jesus andando por cima das ondas. Ele acalma nosso medo.</desc>
+<rect class="paintable" data-group="fundo" fill="#fff" height="600" width="800" x="0" y="0"></rect>
+<g stroke="#111" stroke-width="4">
+<!-- Ondas -->
+<path class="paintable" d="M0,450 Q100,420 200,450 T400,450 T600,450 T800,450 L800,520 L0,520 Z" data-group="onda" fill="#ffffff"></path>
+<!-- Figura andando -->
+<circle class="paintable" cx="400" cy="330" data-group="andando-cabeca" fill="#ffffff" r="20"></circle>
+<rect class="paintable" data-group="andando-corpo" fill="#ffffff" height="80" width="40" x="380" y="350"></rect>
+</g>
+</svg>
+<!-- Cena 11: 10 MANDAMENTOS -->
+<svg aria-hidden="true" class="scene" id="scene-mandamentos" viewbox="0 0 800 600"><title>Mandamentos</title><desc>Duas tábuas com os Dez Mandamentos, os conselhos de Deus para vivermos bem.</desc>
+<rect class="paintable" data-group="fundo" fill="#fff" height="600" width="800" x="0" y="0"></rect>
+<g stroke="#111" stroke-width="4">
+<rect class="paintable" data-group="tabua1" fill="#ffffff" height="200" rx="40" width="80" x="260" y="250"></rect>
+<rect class="paintable" data-group="tabua2" fill="#ffffff" height="200" rx="40" width="80" x="460" y="250"></rect>
+</g>
+</svg>
+<!-- Cena 12: ABRAÇO ENTRE AMIGOS -->
+<svg aria-hidden="true" class="scene" id="scene-abraco" viewbox="0 0 800 600"><title>Abraco</title><desc>Dois amigos dando um abraço. Deus gosta quando somos gentis e amigos.</desc>
+<rect class="paintable" data-group="fundo" fill="#fff" height="600" width="800" x="0" y="0"></rect>
+<g stroke="#111" stroke-width="4">
+<!-- Pessoa 1 -->
+<circle class="paintable" cx="350" cy="300" data-group="amigo1-cabeca" fill="#ffffff" r="22"></circle>
+<rect class="paintable" data-group="amigo1-corpo" fill="#ffffff" height="80" width="44" x="330" y="322"></rect>
+<!-- Pessoa 2 -->
+<circle class="paintable" cx="450" cy="300" data-group="amigo2-cabeca" fill="#ffffff" r="22"></circle>
+<rect class="paintable" data-group="amigo2-corpo" fill="#ffffff" height="80" width="44" x="430" y="322"></rect>
+<!-- Braços envolvendo -->
+<path class="paintable" d="M374,360 Q400,340 426,360" data-group="braco1" fill="#ffffff"></path>
+<path class="paintable" d="M374,380 Q400,360 426,380" data-group="braco2" fill="#ffffff"></path>
+</g>
+</svg>
+<!-- Cena 13: BÍBLIA -->
+<svg aria-hidden="true" class="scene" id="scene-biblia" viewbox="0 0 800 600"><title>Biblia</title><desc>A Bíblia aberta, nosso livro especial para conhecer o amor de Deus.</desc>
+<rect class="paintable" data-group="fundo" fill="#fff" height="600" width="800" x="0" y="0"></rect>
+<g stroke="#111" stroke-width="4">
+<rect class="paintable" data-group="livro-esquerda" fill="#ffffff" height="220" rx="10" width="140" x="240" y="250"></rect>
+<rect class="paintable" data-group="livro-direita" fill="#ffffff" height="220" rx="10" width="140" x="420" y="250"></rect>
+<!-- Espinha (não pintável) -->
+<line stroke="#111" stroke-width="4" x1="390" x2="390" y1="250" y2="470"></line>
+</g>
+</svg>
+</div>
+</section>
+</main>
+<footer>
+<div class="links">
+      Referências:
+      <a href="https://developer.mozilla.org/en-US/docs/Web/SVG" rel="noopener" target="_blank">MDN: SVG</a> •
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/click_event" rel="noopener" target="_blank">Eventos de clique</a> •
+      <a href="https://aasouzaconsult.github.io/biblia/" rel="noopener" target="_blank">Página Inicial</a>
+</div>
+</footer>
+<script>
+    // Paleta de cores
+    const paletteColours = ["#F44336","#FF9800","#FFEB3B","#4CAF50","#00BCD4","#3F51B5","#9C27B0","#795548","#000000","#7f8c8d","#ffffff"];
+    const paletteEl = document.getElementById("palette");
+    const curBadge = document.getElementById("cur");
+    let currentColor = paletteColours[0];
+    function renderPalette(){
+      paletteColours.forEach((c,i)=>{
+        const b=document.createElement("button");
+        b.className="sw";
+        b.style.background=c;
+        b.setAttribute("role","radio");
+        b.setAttribute("aria-checked", i===0?"true":"false");
+        if(i===0) b.setAttribute("aria-selected","true");
+        b.addEventListener("click",()=>{
+          currentColor=c;
+          [...paletteEl.children].forEach(x=>x.removeAttribute("aria-selected"));
+          b.setAttribute("aria-selected","true");
+          curBadge.innerHTML=`Cor atual: <b>${currentColor}</b>`;
+        });
+        paletteEl.appendChild(b);
+      });
+      curBadge.innerHTML=`Cor atual: <b>${currentColor}</b>`;
+    }
+    renderPalette();
+    // Definição das cenas
+    const scenes={
+      fogueira:document.getElementById("scene-fogueira"),
+      arca:document.getElementById("scene-arca"),
+      jardim:document.getElementById("scene-jardim"),
+      baleia:document.getElementById("scene-baleia"),
+      jesuscriancas:document.getElementById("scene-jesuscriancas"),
+      moises:document.getElementById("scene-moises"),
+      deserto:document.getElementById("scene-deserto"),
+      paespeixes:document.getElementById("scene-paespeixes"),
+      pescaria:document.getElementById("scene-pescaria"),
+      andando:document.getElementById("scene-andando"),
+      mandamentos:document.getElementById("scene-mandamentos"),
+      abraco:document.getElementById("scene-abraco"),
+      biblia:document.getElementById("scene-biblia")
+    };
+const sceneDescriptions = {"fogueira": "Uma fogueira quentinha com pedras ao redor. Lembra a história em que Deus falou com Moisés na sarça ardente.", "arca": "A Arca de Noé flutuando nas águas. Deus prometeu cuidar de nós, como mostrou com o arco‑íris.", "jardim": "Um jardim com uma árvore cheia de frutinhas, um coelhinho e um passarinho.", "baleia": "Jonas e a grande baleia no mar. Deus cuidou de Jonas mesmo quando ele errou.", "jesuscriancas": "Jesus recebendo as crianças com carinho. Ele disse: “Deixem as crianças virem a mim”.", "moises": "Moisés com o mar se abrindo para o povo passar com segurança.", "deserto": "Dunas de areia e uma palmeira no deserto. Deus guia a gente mesmo em lugares difíceis.", "paespeixes": "Cinco pães e dois peixinhos em um cesto. Jesus multiplicou e alimentou muita gente.", "pescaria": "Um barquinho no mar e peixinhos nadando. Parece um dia de pescaria com os amigos de Jesus.", "andando": "Jesus andando por cima das ondas. Ele acalma nosso medo.", "mandamentos": "Duas tábuas com os Dez Mandamentos, os conselhos de Deus para vivermos bem.", "abraco": "Dois amigos dando um abraço. Deus gosta quando somos gentis e amigos.", "biblia": "A Bíblia aberta, nosso livro especial para conhecer o amor de Deus."};
+
+const hintEl = document.getElementById("hint");
+function updateDescription(id){
+  if(!hintEl) return;
+  const desc = sceneDescriptions[id] || "";
+  hintEl.innerHTML = "<b>Descrição:</b> " + desc + "<div style=\"margin-top:6px\">Dica: escolha a cor na paleta e <b>clique</b> na parte do desenho para preencher.</div>";
+}
+
+    // Troca de cena ao clicar nas tabs
+    document.getElementById("tabs").addEventListener("click",(e)=>{
+      const btn=e.target.closest(".tab");
+      if(!btn) return;
+      const id=btn.dataset.scene;
+      document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected", t===btn?"true":"false"));
+      Object.entries(scenes).forEach(([k,svg])=> svg.setAttribute("aria-hidden", k===id?"false":"true"));
+      updateDescription(id);
+    });
+    updateDescription('fogueira');
+    
+    function colorirStrokeSeNecessario(el, color){
+      const hasFill = el.hasAttribute('fill');
+      // Alguns elementos têm fill, outros são apenas traços (arcos).
+      if(hasFill){
+        el.setAttribute('fill', color);
+      }else{
+        // Garante que fique visível para a criança
+        el.setAttribute('stroke', color);
+        if(!el.hasAttribute('stroke-width')) el.setAttribute('stroke-width', '6');
+      }
+    }
+    
+    // Pintura por clique
+    Object.values(scenes).forEach(svg=>{
+      svg.addEventListener("click",(e)=>{
+        const el=e.target;
+        if(!el.classList.contains("paintable")) return;
+        colorirStrokeSeNecessario(el, currentColor);
+      });
+    });
+    // Limpar cena
+    document.getElementById("clear").addEventListener("click",()=>{
+      const active=Object.values(scenes).find(s=>s.getAttribute("aria-hidden")==="false");
+      active.querySelectorAll(".paintable").forEach(p=>p.setAttribute("fill","#ffffff"));
+    });
+    // Salvar como PNG
+    document.getElementById("save").addEventListener("click", async ()=>{
+      const active=Object.values(scenes).find(s=>s.getAttribute("aria-hidden")==="false");
+      const svgData=new XMLSerializer().serializeToString(active);
+      const svgBlob=new Blob([svgData],{type:"image/svg+xml;charset=utf-8"});
+      const url=URL.createObjectURL(svgBlob);
+      const img=new Image();
+      const w=active.viewBox.baseVal.width || 800;
+      const h=active.viewBox.baseVal.height || 600;
+      const canvas=document.createElement("canvas");
+      canvas.width=w; canvas.height=h;
+      const ctx=canvas.getContext("2d");
+      await new Promise(res=>{
+        img.onload=()=>{
+          ctx.fillStyle="#fff";
+          ctx.fillRect(0,0,w,h);
+          ctx.drawImage(img,0,0,w,h);
+          URL.revokeObjectURL(url);
+          res();
+        };
+        img.src=url;
+      });
+      canvas.toBlob(blob=>{
+        const a=document.createElement("a");
+        a.href=URL.createObjectURL(blob);
+        a.download="pintura.png";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      },"image/png",0.95);
+    });
+  
+
+// Criar descrição dentro da tela de desenho (overlay)
+const stage = document.querySelector('.stage .canvas-card');
+let canvasCaption = stage.querySelector('.canvas-caption');
+if(!canvasCaption){
+  canvasCaption = document.createElement('div');
+  canvasCaption.className = 'canvas-caption';
+  canvasCaption.setAttribute('role','note');
+  stage.appendChild(canvasCaption);
+}
+
+
+if(typeof updateDescription === 'function'){
+  const _old = updateDescription;
+  updateDescription = function(id){
+    _old(id);
+    if(canvasCaption){
+      const txt = sceneDescriptions[id] || '';
+      canvasCaption.innerHTML = '<b>Descrição:</b> ' + txt;
+    }
+  }
+}
+
+updateDescription('fogueira');</script>
+</body>
+</html>
