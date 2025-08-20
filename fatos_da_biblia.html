@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fatos da Bíblia</title>
+<meta name="description" content="Página responsiva e moderna apresentando fatos sobre a Bíblia, com links diretos para livros e versículos citados." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0c10;
+    --bg-2:#101218;
+    --text:#e8eaf1;
+    --muted:#aab2c8;
+    --brand:#7dd3fc;      /* azul-ciano */
+    --accent:#a78bfa;     /* roxo */
+    --card:#0f1117cc;     /* glass */
+    --border:#2b3142;
+    --ok:#22c55e;
+    --danger:#ef4444;
+    --radius:16px;
+    --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--text); background:radial-gradient(1200px 800px at 20% -10%, #1b2440, transparent 60%),
+                       radial-gradient(1000px 700px at 100% 10%, #2b1344, transparent 60%),
+                       linear-gradient(180deg, var(--bg), var(--bg-2));
+  }
+  a{color:var(--brand); text-decoration:none}
+  a:hover{text-decoration:underline}
+  header{
+    position:sticky; top:0; z-index:20; backdrop-filter:saturate(1.2) blur(10px);
+    background:linear-gradient(180deg, rgba(15,17,23,.85), rgba(15,17,23,.35));
+    border-bottom:1px solid var(--border); box-shadow:var(--shadow);
+  }
+  .wrap{max-width:1100px; margin:auto; padding:16px}
+  .brand{display:flex; gap:12px; align-items:center}
+  .brand .logo{width:38px; height:38px; border-radius:10px; background:conic-gradient(from 180deg, var(--brand), var(--accent)); box-shadow:0 0 0 3px #ffffff07}
+  .brand h1{font-size:20px; margin:0; letter-spacing:.3px}
+  .hero{
+    display:grid; place-items:center; min-height:58vh; text-align:center; padding:64px 16px 24px;
+  }
+  .hero h2{font-size:clamp(28px, 6vw, 52px); margin:0 0 14px; font-weight:800; line-height:1.05}
+  .hero p{max-width:850px; margin:0 auto 22px; color:var(--muted); font-size:clamp(14px, 2.6vw, 18px)}
+  .hero .actions{display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
+  .btn{display:inline-flex; align-items:center; gap:10px; padding:12px 16px; border-radius:12px; border:1px solid var(--border); background:#0f1117; color:var(--text); font-weight:600}
+  .btn.primary{background:linear-gradient(90deg, var(--brand), var(--accent)); color:#0b0c10}
+  .btn:hover{transform:translateY(-1px); box-shadow:var(--shadow)}
+
+  .grid{display:grid; gap:16px; grid-template-columns:repeat(12, 1fr); padding:24px 16px 64px}
+  .card{grid-column:span 12; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow)}
+  .card h3{margin:0 0 8px; font-size:20px}
+  .card p{margin:0; color:var(--muted)}
+  .card .meta{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px}
+  .tag{padding:6px 10px; border:1px solid var(--border); border-radius:999px; font-size:12px; color:#cbd5e1}
+  .card .go{margin-top:12px; display:inline-flex; align-items:center; gap:8px}
+
+  /* Responsive spans */
+  @media (min-width:600px){ .span-6{grid-column:span 6} }
+  @media (min-width:900px){ .span-4{grid-column:span 4} .span-3{grid-column:span 3} }
+
+  footer{color:var(--muted); border-top:1px solid var(--border); padding:24px 16px 64px}
+
+  /* Small motion candy */
+  .shine{position:relative; overflow:hidden}
+  .shine::after{content:""; position:absolute; inset:-200% -100%; background:linear-gradient(120deg, transparent 40%, #ffffff10, transparent 60%); transform:skewX(-15deg); animation:shine 7s linear infinite}
+  @keyframes shine{ to{ transform:skewX(-15deg) translateX(200%) } }
+
+  /* Toggle theme */
+  .toggle{margin-left:auto}
+  .switch{appearance:none; width:54px; height:30px; background:#1f2937; border:1px solid var(--border); border-radius:999px; position:relative; cursor:pointer}
+  .switch:before{content:""; position:absolute; top:2px; left:2px; width:25px; height:25px; border-radius:50%; background:linear-gradient(180deg,#fff,#c7d2fe); transition:.25s}
+  .switch:checked{background:#e5e7eb}
+  .switch:checked:before{left:26px; background:linear-gradient(180deg,#111827,#374151)}
+
+  .credits{font-size:12px; opacity:.8}
+</style>
+</head>
+<body>
+  <header>
+    <div class="wrap" style="display:flex; align-items:center; gap:14px">
+      <div class="brand">
+        <div class="logo"></div>
+        <h1>Fatos da Bíblia</h1>
+      </div>
+      <label class="toggle" title="Alternar tema">
+        <input id="themeSwitch" class="switch" type="checkbox" />
+      </label>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div>
+        <h2 class="shine">Uma visão rápida sobre fatos da Bíblia</h2>
+        <p>Explore estatísticas clássicas e acesse diretamente livros e versículos citados.</p>
+        <div class="actions">
+          <a class="btn primary" href="https://www.bibliaon.com/" target="_blank" rel="noopener">Ler a Bíblia (BibliaOn)</a>
+          <a class="btn" href="#cards">Ver fatos</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="cards" class="grid">
+      <!-- Quantitativos gerais -->
+      <article class="card span-4">
+        <h3>31.163 versículos</h3>
+        <p>Total de versículos em toda a Bíblia.</p>
+        <div class="meta"><span class="tag">Estatística</span><span class="tag">Geral</span></div>
+      </article>
+      <article class="card span-4">
+        <h3>1.189 capítulos</h3>
+        <p>Contagem somando AT e NT.</p>
+        <div class="meta"><span class="tag">Estatística</span></div>
+      </article>
+      <article class="card span-4">
+        <h3>773.693 palavras</h3>
+        <p>Estimativa popular em PT (varia por tradução).</p>
+        <div class="meta"><span class="tag">Aproximação</span></div>
+      </article>
+
+      <article class="card span-3">
+        <h3>3.566.480 letras</h3>
+        <p>Estimativa tradicional (pode variar por edição).</p>
+        <div class="meta"><span class="tag">Aproximação</span></div>
+      </article>
+      <article class="card span-3">
+        <h3>2.930 personagens</h3>
+        <p>Contagem aproximada de personagens nomeados.</p>
+        <div class="meta"><span class="tag">Aproximação</span></div>
+      </article>
+      <article class="card span-6">
+        <h3>“SENHOR” — 1.855 vezes</h3>
+        <p>Ocorrências variam por tradução; valor clássico em PT.</p>
+        <div class="meta"><span class="tag">Texto</span><span class="tag">Linguística</span></div>
+      </article>
+
+      <!-- Cards com links -->
+      <article class="card span-6">
+        <h3>Maior versículo — Ester 8:9</h3>
+        <p>Considerado o versículo mais longo por número de palavras.</p>
+        <a class="go" target="_blank" rel="noopener" href="https://www.bibliaonline.com.br/acf/et/8/9">Abrir Ester 8:9</a>
+      </article>
+      <article class="card span-6">
+        <h3>Menor versículo — Êxodo 20:13</h3>
+        <p>Em português: “Não matarás”. Em outras línguas, a referência pode variar.</p>
+        <a class="go" target="_blank" rel="noopener" href="https://www.bibliaonline.com.br/acf/ex/20/13">Abrir Êxodo 20:13</a>
+      </article>
+
+      <article class="card span-4">
+        <h3>Centro da Bíblia — Salmo 118:8</h3>
+        <p>Tradição popular; o “centro” depende da versão/contagem.</p>
+        <a class="go" target="_blank" rel="noopener" href="https://www.bibliaonline.com.br/acf/sl/118/8">Abrir Salmo 118:8</a>
+      </article>
+      <article class="card span-4">
+        <h3>Menor capítulo — Salmo 117</h3>
+        <p>Capítulo mais curto, com apenas dois versículos.</p>
+        <a class="go" target="_blank" rel="noopener" href="https://www.bibliaonline.com.br/acf/sl/117">Abrir Salmo 117</a>
+      </article>
+      <article class="card span-4">
+        <h3>Maior capítulo — Salmo 119</h3>
+        <p>O mais extenso, estruturado pelo alfabeto hebraico.</p>
+        <a class="go" target="_blank" rel="noopener" href="https://www.bibliaonline.com.br/acf/sl/119">Abrir Salmo 119</a>
+      </article>
+
+      <article class="card span-12">
+        <h3>Salmos 14 e 53 — paralelos</h3>
+        <p>Os dois salmos são muito semelhantes; ótimos para comparação textual.</p>
+        <div class="actions" style="gap:10px; margin-top:12px; display:flex; flex-wrap:wrap">
+          <a class="btn" target="_blank" rel="noopener" href="https://www.bibliaonline.com.br/acf/sl/14">Abrir Salmo 14</a>
+          <a class="btn" target="_blank" rel="noopener" href="https://www.bibliaonline.com.br/acf/sl/53">Abrir Salmo 53</a>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <p class="credits">Fontes e contagens variam por tradução (ACF, ARA, NVI, etc.). Os links acima usam <strong>Bíblia Online (ACF)</strong></p>
+  </footer>
+
+<script>
+  // Alternar tema claro/escuro (apenas trocando fundo/cores básicas)
+  const sw = document.getElementById('themeSwitch');
+  const setLight = (on)=>{
+    document.documentElement.style.setProperty('--bg', on ? '#f5f7fb' : '#0b0c10');
+    document.documentElement.style.setProperty('--bg-2', on ? '#e9edf6' : '#101218');
+    document.documentElement.style.setProperty('--text', on ? '#0b1220' : '#e8eaf1');
+    document.documentElement.style.setProperty('--card', on ? '#ffffffcc' : '#0f1117cc');
+    document.documentElement.style.setProperty('--border', on ? '#d5d9e6' : '#2b3142');
+    document.body.style.background = on
+      ? 'radial-gradient(1200px 800px at 20% -10%, #e0e7ff, transparent 60%),\n         radial-gradient(1000px 700px at 100% 10%, #ffe4e6, transparent 60%),\n         linear-gradient(180deg, var(--bg), var(--bg-2))'
+      : 'radial-gradient(1200px 800px at 20% -10%, #1b2440, transparent 60%),\n         radial-gradient(1000px 700px at 100% 10%, #2b1344, transparent 60%),\n         linear-gradient(180deg, var(--bg), var(--bg-2))';
+  };
+  sw.addEventListener('change', e => setLight(e.target.checked));
+</script>
+</body>
+</html>
